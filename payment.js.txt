@@ -1,0 +1,201 @@
+// Логика страницы оплаты
+
+let paymentTimer;
+let remainingTime = 600; // 10 минут в секундах
+let currentBooking = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем авторизацию
+    const currentUser = checkAuth();
+    if (!currentUser) {
+        showMessage('Необходима авторизация', 'error');
+        setTimeout(() => window.location.href = 'auth.html', 2000);
+        return;
+    }
+    
+    // Загружаем данные бронирования
+    const savedBooking = sessionStorage.getItem('currentBooking');
+    if (!savedBooking) {
+        showMessage('Данные бронирования не найдены', 'error');
+        setTimeout(() => window.location.href = 'booking.html', 2000);
+        return;
+    }
+    
+    currentBooking = JSON.parse(savedBooking);
+    
+    // Заполняем информацию
+    fillPaymentInfo();
+    
+    // Запускаем таймер
+    startPaymentTimer();
+    
+    // Настраиваем валидацию чекбокса
+    const paidCheckbox = document.getElementById('paidCheckbox');
+    const confirmBtn = document.getElementById('confirmPaymentBtn');
+    
+    paidCheckbox.addEventListener('change', function() {
+        confirmBtn.disabled = !this.checked;
+    });
+});
+
+function fillPaymentInfo() {
+    if (!currentBooking) return;
+    
+    // Сумма оплаты
+    document.getElementById('paymentAmount').textContent = 
+        currentBooking.prepayment.toLocaleString() + ' ₽';
+    
+    // Код бронирования
+    document.getElementById('bookingCode').textContent = 
+        currentBooking.booking_code || '#B-' + new Date().getFullYear() + '-' + currentBooking.id.toString().padStart(6, '0');
+    
+    // Генерируем случайный номер карты для демо
+    const randomCard = generateRandomCardNumber();
+    document.getElementById('cardNumber').textContent = randomCard;
+}
+
+function startPaymentTimer() {
+    updateTimerDisplay();
+    
+    paymentTimer = setInterval(() => {
+        remainingTime--;
+        updateTimerDisplay();
+        
+        if (remainingTime <= 0) {
+            clearInterval(paymentTimer);
+            showPaymentExpired();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    
+    document.getElementById('paymentTimer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Меняем цвет при малом времени
+    if (remainingTime <= 60) {
+        document.getElementById('paymentTimer').style.color = '#ff4757';
+    }
+}
+
+function showPaymentExpired() {
+    showMessage('Время на оплату истекло. Бронирование отменено.', 'error');
+    
+    // Обновляем статус бронирования
+    const bookings = BeautyProData.getBookings();
+    const bookingIndex = bookings.findIndex(b => b.id === currentBooking.id);
+    
+    if (bookingIndex !== -1) {
+        bookings[bookingIndex].status = 'cancelled';
+        BeautyProData.updateBookings(bookings);
+    }
+    
+    setTimeout(() => {
+        window.location.href = 'booking.html';
+    }, 3000);
+}
+
+function moveCardDigit(current) {
+    const currentInput = document.getElementById(`cardDigit${current}`);
+    const nextInput = document.getElementById(`cardDigit${current + 1}`);
+    
+    if (currentInput.value && nextInput) {
+        nextInput.focus();
+    }
+}
+
+function confirmPayment() {
+    // Проверяем, отмечен ли чекбокс
+    const paidCheckbox = document.getElementById('paidCheckbox');
+    if (!paidCheckbox.checked) {
+        showMessage('Подтвердите, что вы оплатили предоплату', 'error');
+        return;
+    }
+    
+    // Проверяем введены ли последние 4 цифры карты
+    let cardDigits = '';
+    for (let i = 1; i <= 4; i++) {
+        const digit = document.getElementById(`cardDigit${i}`).value;
+        if (!digit || isNaN(digit)) {
+            showMessage('Введите последние 4 цифры карты', 'error');
+            document.getElementById(`cardDigit${i}`).focus();
+            return;
+        }
+        cardDigits += digit;
+    }
+    
+    // Останавливаем таймер
+    clearInterval(paymentTimer);
+    
+    // Обновляем статус бронирования
+    const bookings = BeautyProData.getBookings();
+    const bookingIndex = bookings.findIndex(b => b.id === currentBooking.id);
+    
+    if (bookingIndex !== -1) {
+        bookings[bookingIndex].status = 'confirmed';
+        bookings[bookingIndex].payment_method = 'card_transfer';
+        bookings[bookingIndex].last_card_digits = cardDigits;
+        bookings[bookingIndex].paid_at = new Date().toISOString();
+        
+        BeautyProData.updateBookings(bookings);
+        
+        // Отправляем уведомление мастеру (в реальности через бота)
+        sendNotificationToMaster(bookings[bookingIndex]);
+    }
+    
+    showMessage('Оплата подтверждена! Создаем запись...', 'success');
+    
+    // Переходим на страницу подтверждения
+    setTimeout(() => {
+        sessionStorage.setItem('confirmedBookingId', currentBooking.id);
+        window.location.href = 'booking-success.html';
+    }, 1500);
+}
+
+function sendNotificationToMaster(booking) {
+    // В реальном приложении здесь был бы вызов к Telegram боту
+    // Для демо просто сохраняем в localStorage
+    
+    const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+    
+    const master = BeautyProData.getMasterById(booking.master_id);
+    const service = BeautyProData.getServiceById(booking.service_id);
+    const client = BeautyProData.getUsers().find(u => u.id === booking.client_id);
+    
+    if (master && service && client) {
+        const notification = {
+            id: notifications.length + 1,
+            master_id: master.id,
+            type: 'new_booking',
+            message: `📅 Новая запись!\nКлиент: ${client.name}\nУслуга: ${service.name}\nДата: ${booking.date} ${booking.time}`,
+            created_at: new Date().toISOString(),
+            is_read: false
+        };
+        
+        notifications.push(notification);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        
+        console.log('Уведомление для мастера создано:', notification);
+    }
+}
+
+function goBack() {
+    window.history.back();
+}
+
+// Вспомогательная функция
+function generateRandomCardNumber() {
+    const prefixes = ['2200', '2201', '2202', '2203', '2204'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    
+    let cardNumber = prefix;
+    for (let i = 0; i < 12; i++) {
+        if (i % 4 === 0) cardNumber += ' ';
+        cardNumber += Math.floor(Math.random() * 10);
+    }
+    
+    return cardNumber.trim();
+}

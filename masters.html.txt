@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выберите мастера - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .masters-hero {
+            padding: 80px 0 40px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+        }
+        
+        .page-header {
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 36px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .page-subtitle {
+            color: var(--text-gray);
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 10px;
+            color: var(--text-gray);
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--text-light);
+        }
+        
+        .filters-container {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filters-title {
+            font-size: 20px;
+            color: var(--text-light);
+            margin: 0;
+        }
+        
+        .sort-select {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            background: var(--bg-dark);
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 200px;
+            color: var(--text-light);
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+        
+        .masters-catalog {
+            padding: 40px 0 100px;
+        }
+        
+        .masters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .master-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(138, 43, 226, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .master-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+        
+        .master-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(138, 43, 226, 0.3);
+        }
+        
+        .master-content {
+            padding: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .master-name {
+            font-size: 20px;
+            color: var(--text-light);
+            margin: 0 0 10px 0;
+        }
+        
+        .master-specialties {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .specialty-item {
+            display: inline-block;
+            background: rgba(138, 43, 226, 0.1);
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #8A2BE2;
+        }
+        
+        .master-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .stars {
+            color: #FFD700;
+            font-size: 16px;
+        }
+        
+        .rating-number {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .reviews-count {
+            color: var(--text-gray);
+            font-size: 13px;
+        }
+        
+        .master-experience {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-gray);
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .master-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(138, 43, 226, 0.1);
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .select-master-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .select-master-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-gray);
+        }
+        
+        .no-results-icon {
+            font-size: 64px;
+            color: #8A2BE2;
+            margin-bottom: 20px;
+        }
+        
+        .no-results-title {
+            font-size: 24px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        .no-results-text {
+            color: var(--text-gray);
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .masters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .master-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .page-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="services.html" class="nav-link"><i class="fas fa-spa"></i> Услуги</a>
+                    <a href="masters.html" class="nav-link active"><i class="fas fa-users"></i> Мастера</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="masters-hero">
+        <div class="container">
+            <button class="back-btn" onclick="goBackToServices()">
+                <i class="fas fa-arrow-left"></i> Назад к услугам
+            </button>
+            
+            <div class="page-header">
+                <h1 class="page-title" id="pageTitle">Выберите мастера</h1>
+                <p class="page-subtitle" id="pageSubtitle">Профессиональные специалисты с опытом работы</p>
+            </div>
+            
+            <div class="filters-container">
+                <div class="filters-header">
+                    <h2 class="filters-title">Фильтры</h2>
+                    <select class="sort-select" id="sortSelect">
+                        <option value="rating_desc">По рейтингу (высокий → низкий)</option>
+                        <option value="rating_asc">По рейтингу (низкий → высокий)</option>
+                        <option value="experience_desc">По опыту (больше → меньше)</option>
+                        <option value="experience_asc">По опыту (меньше → больше)</option>
+                    </select>
+                </div>
+                
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <input type="checkbox" id="filterAvailable" class="filter-checkbox">
+                        <label for="filterAvailable" class="filter-label">Только доступные сейчас</label>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <input type="checkbox" id="filterRating" class="filter-checkbox">
+                        <label for="filterRating" class="filter-label">Рейтинг от 4.5+</label>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <input type="checkbox" id="filterExperience" class="filter-checkbox">
+                        <label for="filterExperience" class="filter-label">Опыт от 3 лет</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="masters-catalog">
+        <div class="container">
+            <div class="masters-grid" id="mastersGrid">
+                <div class="no-results">
+                    <div class="no-results-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <h3 class="no-results-title">Загрузка мастеров...</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // Логика страницы мастеров - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        
+        let allMasters = [];
+        let filteredMasters = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница мастеров загружена');
+            loadMasters();
+            setupFilters();
+            
+            // Проверяем выбранную услугу из URL или sessionStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const serviceCategory = urlParams.get('service') || sessionStorage.getItem('selectedServiceCategory');
+            
+            console.log('Выбранная категория услуги:', serviceCategory);
+            
+            if (serviceCategory) {
+                updatePageTitle(serviceCategory);
+                filterByService(serviceCategory);
+            }
+        });
+
+        function loadMasters() {
+            console.log('Загружаем мастеров из базы данных...');
+            
+            // Используем ТВОЮ базу данных Zapis5MinData
+            allMasters = Zapis5MinData.getMasters();
+            console.log('Найдено мастеров:', allMasters.length);
+            
+            // Если мастеров нет, создаем демо-мастеров
+            if (allMasters.length === 0) {
+                console.log('Мастеров нет, создаем демо-данные...');
+                createDemoMasters();
+                allMasters = Zapis5MinData.getMasters();
+            }
+            
+            filteredMasters = [...allMasters];
+            renderMasters();
+            
+            // Применяем фильтры если есть
+            applyFilters();
+        }
+
+        function createDemoMasters() {
+            // Создаем демо-мастеров если их нет в базе
+            const masters = [
+                {
+                    id: 1,
+                    name: "Анна Петрова",
+                    age: 28,
+                    city: "Мыски",
+                    experience: 5,
+                    rating: 4.8,
+                    reviews_count: 154,
+                    avatar_color: "#FF6B8B",
+                    telegram: "@anna_beauty",
+                    phone: "+79999876543",
+                    specialties: ["MANICURE_PEDICURE", "WOMEN_HAIRCUT"],
+                    description: "Профессиональный мастер с 5-летним опытом.",
+                    services: [
+                        { id: 1, name: "Маникюр", price: 2500, duration: 60, category: "MANICURE_PEDICURE" },
+                        { id: 2, name: "Педикюр", price: 3000, duration: 90, category: "MANICURE_PEDICURE" }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "Иван Сидоров",
+                    age: 32,
+                    city: "ГРЭС",
+                    experience: 8,
+                    rating: 4.9,
+                    reviews_count: 203,
+                    avatar_color: "#2196F3",
+                    telegram: "@ivan_barber",
+                    phone: "+79991234567",
+                    specialties: ["MEN_HAIRCUT", "WOMEN_HAIRCUT"],
+                    description: "Мастер мужских и женских стрижек.",
+                    services: [
+                        { id: 3, name: "Мужская стрижка", price: 800, duration: 45, category: "MEN_HAIRCUT" },
+                        { id: 4, name: "Стрижка + бритье", price: 1200, duration: 60, category: "MEN_HAIRCUT" }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Мария Иванова",
+                    age: 25,
+                    city: "Мыски",
+                    experience: 3,
+                    rating: 4.7,
+                    reviews_count: 89,
+                    avatar_color: "#9C27B0",
+                    telegram: "@maria_brows",
+                    phone: "+79998765432",
+                    specialties: ["EYEBROWS", "EYELASHES"],
+                    description: "Специалист по бровям и ресницам.",
+                    services: [
+                        { id: 5, name: "Коррекция бровей", price: 500, duration: 30, category: "EYEBROWS" },
+                        { id: 6, name: "Наращивание ресниц", price: 2500, duration: 120, category: "EYELASHES" }
+                    ]
+                }
+            ];
+            
+            // Сохраняем в базу данных
+            Zapis5MinData.updateMasters(masters);
+            console.log('Демо-мастера созданы и сохранены');
+        }
+
+        function renderMasters() {
+            const mastersGrid = document.getElementById('mastersGrid');
+            
+            if (!filteredMasters || filteredMasters.length === 0) {
+                mastersGrid.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">
+                            <i class="fas fa-users-slash"></i>
+                        </div>
+                        <h3 class="no-results-title">Мастера не найдены</h3>
+                        <p class="no-results-text">Попробуйте изменить параметры фильтрации</p>
+                        <button class="back-btn" onclick="goBackToServices()" style="margin-top: 20px;">
+                            <i class="fas fa-arrow-left"></i> Выбрать другую услугу
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            mastersGrid.innerHTML = '';
+            
+            filteredMasters.forEach(master => {
+                const masterCard = document.createElement('div');
+                masterCard.className = 'master-card';
+                
+                // Получаем инициалы для аватара
+                const initials = getInitials(master.name);
+                
+                // Формируем список специализаций
+                const specialties = master.specialties ? master.specialties.map(cat => {
+                    switch(cat) {
+                        case 'MANICURE_PEDICURE': return 'Маникюр';
+                        case 'MEN_HAIRCUT': return 'Мужская стрижка';
+                        case 'WOMEN_HAIRCUT': return 'Женская стрижка';
+                        case 'EYEBROWS': return 'Брови';
+                        case 'EYELASHES': return 'Ресницы';
+                        default: return cat;
+                    }
+                }).join(', ') : '';
+                
+                // Создаем звезды рейтинга
+                const stars = getStarsHtml(master.rating || 0);
+                
+                masterCard.innerHTML = `
+                    <div class="master-content">
+                        <div class="avatar-circle" style="background: ${master.avatar_color || '#8A2BE2'}">
+                            ${initials}
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 class="master-name">${master.name}</h3>
+                            <div class="master-specialties">
+                                ${specialties.split(', ').map(spec => `<span class="specialty-item">${spec}</span>`).join('')}
+                            </div>
+                            <div class="master-rating">
+                                <div class="stars">${stars}</div>
+                                <span class="rating-number">${master.rating || 0}</span>
+                                <span class="reviews-count">(${master.reviews_count || 0})</span>
+                            </div>
+                            <div class="master-experience">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Опыт: ${master.experience || 0} лет</span>
+                            </div>
+                            <div class="master-experience">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${master.city || 'Не указан'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="master-footer">
+                        <button class="select-master-btn" onclick="selectMaster(${master.id})">
+                            Выбрать мастера
+                        </button>
+                    </div>
+                `;
+                
+                mastersGrid.appendChild(masterCard);
+            });
+        }
+
+        function setupFilters() {
+            const sortSelect = document.getElementById('sortSelect');
+            const filterAvailable = document.getElementById('filterAvailable');
+            const filterRating = document.getElementById('filterRating');
+            const filterExperience = document.getElementById('filterExperience');
+            
+            // Назначаем обработчики
+            if (sortSelect) sortSelect.addEventListener('change', applyFilters);
+            if (filterAvailable) filterAvailable.addEventListener('change', applyFilters);
+            if (filterRating) filterRating.addEventListener('change', applyFilters);
+            if (filterExperience) filterExperience.addEventListener('change', applyFilters);
+        }
+
+        function applyFilters() {
+            const sortSelect = document.getElementById('sortSelect');
+            const filterAvailable = document.getElementById('filterAvailable');
+            const filterRating = document.getElementById('filterRating');
+            const filterExperience = document.getElementById('filterExperience');
+            
+            // Фильтрация
+            filteredMasters = allMasters.filter(master => {
+                let pass = true;
+                
+                // Фильтр по рейтингу
+                if (filterRating && filterRating.checked && master.rating < 4.5) {
+                    pass = false;
+                }
+                
+                // Фильтр по опыту
+                if (filterExperience && filterExperience.checked && master.experience < 3) {
+                    pass = false;
+                }
+                
+                // Фильтр по доступности (упрощенный)
+                if (filterAvailable && filterAvailable.checked) {
+                    // Здесь можно добавить проверку текущего времени
+                    // Для демо просто пропускаем всех
+                }
+                
+                return pass;
+            });
+            
+            // Сортировка
+            if (sortSelect) {
+                const sortValue = sortSelect.value;
+                filteredMasters.sort((a, b) => {
+                    switch(sortValue) {
+                        case 'rating_desc': return (b.rating || 0) - (a.rating || 0);
+                        case 'rating_asc': return (a.rating || 0) - (b.rating || 0);
+                        case 'experience_desc': return (b.experience || 0) - (a.experience || 0);
+                        case 'experience_asc': return (a.experience || 0) - (b.experience || 0);
+                        default: return 0;
+                    }
+                });
+            }
+            
+            renderMasters();
+        }
+
+        function filterByService(category) {
+            console.log('Фильтруем по услуге:', category);
+            
+            if (!category || category === 'all') {
+                filteredMasters = [...allMasters];
+            } else {
+                filteredMasters = allMasters.filter(master => {
+                    if (!master.specialties || !Array.isArray(master.specialties)) {
+                        return false;
+                    }
+                    
+                    // Проверяем есть ли у мастера нужная специализация
+                    const hasSpecialty = master.specialties.includes(category);
+                    console.log(`Мастер ${master.name}: ${master.specialties} -> ${hasSpecialty}`);
+                    
+                    return hasSpecialty;
+                });
+            }
+            
+            console.log('После фильтрации осталось:', filteredMasters.length, 'мастеров');
+            renderMasters();
+        }
+
+        function updatePageTitle(category) {
+            const serviceNames = {
+                'MANICURE_PEDICURE': 'Маникюр и педикюр',
+                'MEN_HAIRCUT': 'Мужская стрижка',
+                'WOMEN_HAIRCUT': 'Женская стрижка',
+                'EYEBROWS': 'Брови',
+                'EYELASHES': 'Ресницы'
+            };
+            
+            const serviceName = serviceNames[category] || 'Услуге';
+            document.getElementById('pageTitle').textContent = `Мастера по ${serviceName}`;
+            document.getElementById('pageSubtitle').textContent = `Специалисты по ${serviceName.toLowerCase()}`;
+        }
+
+        // ВАЖНО: ЭТУ ФУНКЦИЮ ИСПРАВИЛ - теперь она ведет на master.html с параметром id
+        function selectMaster(masterId) {
+            console.log('Выбран мастер ID:', masterId);
+            
+            // Сохраняем ID мастера в sessionStorage (на всякий случай)
+            sessionStorage.setItem('selectedMasterId', masterId);
+            
+            // Сохраняем данные мастера для страницы записи
+            const master = allMasters.find(m => m.id === masterId);
+            if (master) {
+                sessionStorage.setItem('selectedMasterData', JSON.stringify({
+                    id: master.id,
+                    name: master.name,
+                    city: master.city,
+                    avatar_color: master.avatar_color,
+                    specialties: master.specialties,
+                    services: master.services,
+                    rating: master.rating
+                }));
+            }
+            
+            // ПЕРЕХОДИМ НА УНИВЕРСАЛЬНУЮ СТРАНИЦУ МАСТЕРА С ID В URL
+            window.location.href = `master.html?id=${masterId}`;
+        }
+
+        function goBackToServices() {
+            window.location.href = 'services.html';
+        }
+
+        // Вспомогательные функции
+        function getInitials(name) {
+            if (!name) return 'МК';
+            return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getStarsHtml(rating) {
+            if (!rating) rating = 0;
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i === Math.ceil(rating) && rating % 1 >= 0.5) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+    </script>
+</body>
+</html>

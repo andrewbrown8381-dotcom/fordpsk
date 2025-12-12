@@ -1,0 +1,168 @@
+// masters.js - ПРОСТАЯ РАБОЧАЯ ВЕРСИЯ
+console.log('masters.js загружен');
+
+let allMasters = [];
+let filteredMasters = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен');
+    loadMasters();
+    
+    // Проверяем выбранную услугу
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceCategory = urlParams.get('service') || sessionStorage.getItem('selectedServiceCategory');
+    
+    console.log('Выбранная услуга:', serviceCategory);
+    
+    if (serviceCategory) {
+        filterByService(serviceCategory);
+    }
+});
+
+function loadMasters() {
+    console.log('Загружаем мастеров...');
+    // Берем мастеров из ТВОЕЙ базы данных
+    allMasters = Zapis5MinData.getMasters();
+    filteredMasters = [...allMasters];
+    console.log('Всего мастеров:', allMasters.length);
+    renderMasters();
+}
+
+function filterByService(category) {
+    console.log('Фильтруем по категории:', category);
+    
+    if (!category) {
+        console.log('Категория не указана, показываем всех');
+        filteredMasters = [...allMasters];
+        renderMasters();
+        return;
+    }
+    
+    // ФИЛЬТРУЕМ: оставляем только мастеров с нужной специализацией
+    filteredMasters = allMasters.filter(master => {
+        // Проверяем есть ли у мастера такая специализация
+        if (!master.specialties) return false;
+        
+        // Преобразуем в верхний регистр для надежности
+        const masterSpecs = master.specialties.map(s => s.toUpperCase());
+        const targetCategory = category.toUpperCase();
+        
+        const hasSpecialty = masterSpecs.includes(targetCategory);
+        console.log(`Мастер ${master.name}: ${master.specialties} -> ${hasSpecialty}`);
+        
+        return hasSpecialty;
+    });
+    
+    console.log('После фильтрации осталось:', filteredMasters.length, 'мастеров');
+    renderMasters();
+}
+
+function renderMasters() {
+    const mastersGrid = document.getElementById('mastersGrid');
+    if (!mastersGrid) {
+        console.error('Элемент mastersGrid не найден!');
+        return;
+    }
+    
+    mastersGrid.innerHTML = '';
+    
+    if (filteredMasters.length === 0) {
+        mastersGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text-gray);">
+                <i class="fas fa-users-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>Мастера по выбранной услуге не найдены</p>
+                <button class="back-btn" onclick="goBackToServices()" style="margin-top: 20px;">
+                    <i class="fas fa-arrow-left"></i> Выбрать другую услугу
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    filteredMasters.forEach(master => {
+        const masterCard = document.createElement('div');
+        masterCard.className = 'master-card';
+        
+        const initials = getInitials(master.name);
+        const specialties = getSpecialtiesText(master.specialties);
+        
+        masterCard.innerHTML = `
+            <div class="master-content">
+                <div class="master-avatar">
+                    <div class="avatar-circle" style="background: ${master.avatar_color}">
+                        ${initials}
+                    </div>
+                </div>
+                <div class="master-info">
+                    <h3 class="master-name">${master.name}</h3>
+                    <div class="master-specialties">
+                        ${specialties}
+                    </div>
+                    <div class="master-rating">
+                        <div class="stars">${getStarsHtml(master.rating)}</div>
+                        <span class="rating-number">${master.rating}</span>
+                        <span class="reviews-count">(${master.reviews_count})</span>
+                    </div>
+                    <div class="master-experience">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Опыт: ${master.experience} лет</span>
+                    </div>
+                    <div class="master-experience">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${master.city}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="master-footer">
+                <button class="select-master-btn" onclick="selectMaster(${master.id})">
+                    Выбрать мастера
+                </button>
+            </div>
+        `;
+        
+        mastersGrid.appendChild(masterCard);
+    });
+}
+
+function getInitials(name) {
+    return name.split(' ').map(word => word[0]).join('').toUpperCase();
+}
+
+function getSpecialtiesText(specialties) {
+    if (!specialties || !Array.isArray(specialties)) return '';
+    
+    const specialtiesMap = {
+        'MANICURE_PEDICURE': 'Маникюр',
+        'MEN_HAIRCUT': 'Мужская стрижка',
+        'WOMEN_HAIRCUT': 'Женская стрижка',
+        'EYEBROWS': 'Брови',
+        'EYELASHES': 'Ресницы'
+    };
+    
+    return specialties.map(spec => 
+        `<span class="specialty-item">${specialtiesMap[spec] || spec}</span>`
+    ).join('');
+}
+
+function getStarsHtml(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= Math.floor(rating)) {
+            stars += '<i class="fas fa-star"></i>';
+        } else if (i === Math.ceil(rating) && rating % 1 >= 0.5) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            stars += '<i class="far fa-star"></i>';
+        }
+    }
+    return stars;
+}
+
+function selectMaster(masterId) {
+    sessionStorage.setItem('selectedMasterId', masterId);
+    window.location.href = `master-${masterId}.html`;
+}
+
+function goBackToServices() {
+    window.location.href = 'services.html';
+}

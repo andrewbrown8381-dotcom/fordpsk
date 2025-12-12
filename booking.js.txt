@@ -1,0 +1,457 @@
+// Логика страницы записи
+
+let currentStep = 1;
+let bookingData = {};
+let selectedDate = null;
+let selectedTime = null;
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let masterWorkSchedule = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем авторизацию
+    const currentUser = checkAuth();
+    if (!currentUser) {
+        showMessage('Для записи необходимо войти в систему', 'error');
+        setTimeout(() => {
+            window.location.href = 'auth.html?redirect=booking';
+        }, 2000);
+        return;
+    }
+    
+    // Загружаем данные записи
+    const savedData = sessionStorage.getItem('bookingData');
+    if (!savedData) {
+        showMessage('Данные записи не найдены', 'error');
+        setTimeout(() => window.location.href = 'services.html', 2000);
+        return;
+    }
+    
+    bookingData = JSON.parse(savedData);
+    
+    // Загружаем информацию о мастере
+    const master = BeautyProData.getMasterById(bookingData.masterId);
+    if (!master) {
+        showMessage('Мастер не найден', 'error');
+        setTimeout(() => window.location.href = 'masters.html', 2000);
+        return;
+    }
+    
+    // Сохраняем расписание мастера
+    masterWorkSchedule = master.work_schedule;
+    
+    // Заполняем информацию о мастере
+    fillMasterInfo(master);
+    
+    // Инициализируем календарь
+    initCalendar();
+    
+    // Заполняем сводку
+    updateSummary();
+});
+
+function fillMasterInfo(master) {
+    const masterInfoCard = document.getElementById('masterInfoCard');
+    const initials = getInitials(master.name);
+    
+    masterInfoCard.innerHTML = `
+        <div class="master-avatar-small" style="background: ${master.avatar_color}">
+            ${initials}
+        </div>
+        <div class="master-details">
+            <h3>${master.name}</h3>
+            <p><i class="fas fa-star"></i> Рейтинг: ${master.rating} (${master.reviews_count} отзывов)</p>
+            <p><i class="fas fa-briefcase"></i> Опыт: ${master.experience} лет</p>
+            <p><i class="fas fa-map-marker-alt"></i> ${master.city}</p>
+        </div>
+    `;
+}
+
+function initCalendar() {
+    updateCalendarDisplay();
+    generateCalendar();
+}
+
+function updateCalendarDisplay() {
+    const monthNames = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    
+    document.getElementById('currentMonth').textContent = 
+        `${monthNames[currentMonth]} ${currentYear}`;
+}
+
+function generateCalendar() {
+    const calendarGrid = document.getElementById('calendarGrid');
+    calendarGrid.innerHTML = '';
+    
+    // Заголовки дней недели
+    const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+    dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+    });
+    
+    // Первый день месяца
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const startingDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    
+    // Последний день месяца
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const totalDays = lastDay.getDate();
+    
+    // Сегодня
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Прошлые дни
+    for (let i = 0; i < startingDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day disabled';
+        emptyDay.textContent = '';
+        calendarGrid.appendChild(emptyDay);
+    }
+    
+    // Дни месяца
+    for (let day = 1; day <= totalDays; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        
+        // Проверяем, сегодня ли это
+        if (date.getTime() === today.getTime()) {
+            dayElement.classList.add('today');
+        }
+        
+        // Проверяем, прошедшая ли это дата
+        if (date < today) {
+            dayElement.classList.add('past');
+        }
+        
+        // Проверяем, работает ли мастер в этот день
+        const dayOfWeek = date.getDay(); // 0 - воскресенье, 1 - понедельник, etc
+        const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const weekdayKey = weekdays[dayOfWeek];
+        
+        if (!masterWorkSchedule[weekdayKey] || masterWorkSchedule[weekdayKey].length === 0) {
+            dayElement.classList.add('disabled');
+        }
+        
+        // Проверяем, занята ли дата
+        const bookings = BeautyProData.getBookings();
+        const isBooked = bookings.some(booking => {
+            const bookingDate = new Date(booking.date);
+            return bookingDate.toDateString() === date.toDateString() && 
+                   booking.master_id === bookingData.masterId &&
+                   booking.status !== 'cancelled';
+        });
+        
+        if (isBooked) {
+            dayElement.classList.add('booked');
+        }
+        
+        // Если дата не прошедшая и не заблокирована
+        if (!dayElement.classList.contains('past') && 
+            !dayElement.classList.contains('disabled') &&
+            !dayElement.classList.contains('booked')) {
+            
+            dayElement.addEventListener('click', () => selectDate(date));
+            
+            // Если это выбранная дата
+            if (selectedDate && selectedDate.toDateString() === date.toDateString()) {
+                dayElement.classList.add('selected');
+            }
+        }
+        
+        calendarGrid.appendChild(dayElement);
+    }
+}
+
+function selectDate(date) {
+    selectedDate = date;
+    generateCalendar();
+    
+    // Разблокируем кнопку "Далее"
+    document.getElementById('nextToStep2').disabled = false;
+    
+    // Сохраняем в bookingData
+    bookingData.date = date.toISOString().split('T')[0];
+}
+
+function changeMonth(delta) {
+    currentMonth += delta;
+    
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    
+    updateCalendarDisplay();
+    generateCalendar();
+}
+
+function nextToStep2() {
+    if (!selectedDate) {
+        showMessage('Пожалуйста, выберите дату', 'error');
+        return;
+    }
+    
+    // Обновляем отображение даты
+    const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    
+    document.getElementById('selectedDateDisplay').textContent = 
+        dateFormatter.format(selectedDate);
+    
+    // Показываем доступные временные слоты
+    generateTimeSlots();
+    
+    // Переключаем шаги
+    switchStep(2);
+}
+
+function generateTimeSlots() {
+    const timeSlotsGrid = document.getElementById('timeSlotsGrid');
+    timeSlotsGrid.innerHTML = '';
+    
+    if (!selectedDate) return;
+    
+    // Получаем день недели
+    const dayOfWeek = selectedDate.getDay();
+    const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const weekdayKey = weekdays[dayOfWeek];
+    
+    // Получаем рабочие интервалы мастера
+    const workIntervals = masterWorkSchedule[weekdayKey] || [];
+    
+    // Генерируем временные слоты
+    let allSlots = [];
+    
+    workIntervals.forEach(interval => {
+        const [startTime, endTime] = interval.split('-');
+        const slots = generateSlotsFromInterval(startTime, endTime);
+        allSlots = allSlots.concat(slots);
+    });
+    
+    // Получаем существующие записи на эту дату
+    const bookings = BeautyProData.getBookings();
+    const bookedSlots = bookings
+        .filter(booking => {
+            const bookingDate = new Date(booking.date);
+            return bookingDate.toDateString() === selectedDate.toDateString() && 
+                   booking.master_id === bookingData.masterId &&
+                   booking.status !== 'cancelled';
+        })
+        .map(booking => booking.time);
+    
+    // Создаем элементы слотов
+    allSlots.forEach(slot => {
+        const slotElement = document.createElement('div');
+        slotElement.className = 'time-slot';
+        slotElement.textContent = slot;
+        
+        // Проверяем, занят ли слот
+        if (bookedSlots.includes(slot)) {
+            slotElement.classList.add('booked');
+        } else {
+            slotElement.addEventListener('click', () => selectTimeSlot(slot, slotElement));
+        }
+        
+        // Если это выбранный слот
+        if (selectedTime === slot) {
+            slotElement.classList.add('selected');
+        }
+        
+        timeSlotsGrid.appendChild(slotElement);
+    });
+    
+    if (allSlots.length === 0) {
+        timeSlotsGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>Мастер не работает в этот день</p>
+            </div>
+        `;
+    }
+}
+
+function generateSlotsFromInterval(startTime, endTime) {
+    const slots = [];
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    
+    while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+        const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+        slots.push(timeString);
+        
+        // Добавляем 15 минут
+        currentMinute += 15;
+        if (currentMinute >= 60) {
+            currentMinute = 0;
+            currentHour++;
+        }
+    }
+    
+    return slots;
+}
+
+function selectTimeSlot(time, element) {
+    // Убираем выделение со всех слотов
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    
+    // Выделяем выбранный слот
+    element.classList.add('selected');
+    selectedTime = time;
+    
+    // Разблокируем кнопку "Далее"
+    document.getElementById('nextToStep3').disabled = false;
+    
+    // Сохраняем в bookingData
+    bookingData.time = time;
+}
+
+function nextToStep3() {
+    if (!selectedTime) {
+        showMessage('Пожалуйста, выберите время', 'error');
+        return;
+    }
+    
+    // Обновляем сводку
+    updateSummary();
+    
+    // Переключаем шаги
+    switchStep(3);
+}
+
+function updateSummary() {
+    // Получаем информацию об услуге
+    const master = BeautyProData.getMasterById(bookingData.masterId);
+    const service = master.services.find(s => s.id === bookingData.serviceId);
+    
+    if (!service) return;
+    
+    // Форматируем дату
+    const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    
+    const dateString = selectedDate ? dateFormatter.format(selectedDate) : 'не выбрана';
+    const timeString = selectedTime || 'не выбрано';
+    
+    // Расчеты
+    const servicePrice = service.price;
+    const prepayment = Math.floor(servicePrice * 0.5);
+    const remaining = servicePrice - prepayment;
+    
+    // Заполняем сводку
+    document.getElementById('summaryService').textContent = service.name;
+    document.getElementById('summaryMaster').textContent = master.name;
+    document.getElementById('summaryDateTime').textContent = `${dateString}, ${timeString}`;
+    document.getElementById('summaryPrice').textContent = servicePrice.toLocaleString() + ' ₽';
+    document.getElementById('summaryPrepayment').textContent = prepayment.toLocaleString() + ' ₽';
+    document.getElementById('summaryRemaining').textContent = remaining.toLocaleString() + ' ₽';
+    
+    // Сохраняем данные
+    bookingData.servicePrice = servicePrice;
+    bookingData.prepayment = prepayment;
+    bookingData.remaining = remaining;
+}
+
+function confirmBooking() {
+    const currentUser = checkAuth();
+    if (!currentUser) {
+        showMessage('Сессия истекла. Пожалуйста, войдите снова', 'error');
+        setTimeout(() => window.location.href = 'auth.html', 2000);
+        return;
+    }
+    
+    if (!selectedDate || !selectedTime) {
+        showMessage('Пожалуйста, выберите дату и время', 'error');
+        return;
+    }
+    
+    // Создаем запись
+    const booking = {
+        client_id: currentUser.id,
+        master_id: bookingData.masterId,
+        service_id: bookingData.serviceId,
+        date: selectedDate.toISOString().split('T')[0],
+        time: selectedTime,
+        price: bookingData.servicePrice,
+        prepayment: bookingData.prepayment,
+        status: 'pending_payment',
+        created_at: new Date().toISOString()
+    };
+    
+    // Сохраняем запись
+    const newBooking = BeautyProData.addBooking(booking);
+    
+    // Сохраняем для страницы оплаты
+    sessionStorage.setItem('currentBooking', JSON.stringify(newBooking));
+    
+    // Показываем сообщение об успехе
+    showMessage('Запись создана! Переходим к оплате...', 'success');
+    
+    // Переходим на страницу оплаты
+    setTimeout(() => {
+        window.location.href = 'payment.html';
+    }, 1500);
+}
+
+// Управление шагами
+function switchStep(step) {
+    currentStep = step;
+    
+    // Обновляем отображение шагов
+    for (let i = 1; i <= 3; i++) {
+        const stepElement = document.getElementById(`step${i}`);
+        const contentElement = document.getElementById(`step${i}-content`);
+        
+        if (i === step) {
+            stepElement.classList.add('active');
+            contentElement.style.display = 'block';
+        } else {
+            stepElement.classList.remove('active');
+            stepElement.classList.remove('completed');
+            contentElement.style.display = 'none';
+            
+            if (i < step) {
+                stepElement.classList.add('completed');
+            }
+        }
+    }
+}
+
+function backToStep1() {
+    switchStep(1);
+}
+
+function backToStep2() {
+    switchStep(2);
+}
+
+function goBack() {
+    window.history.back();
+}
+
+// Вспомогательная функция
+function getInitials(name) {
+    return name.split(' ').map(word => word[0]).join('').toUpperCase();
+}

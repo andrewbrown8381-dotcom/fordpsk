@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись за 5 минут в Мысках и на Грэсе</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link active"><i class="fas fa-home"></i> Главная</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Найдите своего идеального мастера</h1>
+            <p class="hero-subtitle">Быстрая запись · Топ-специалисты · Гарантия качества</p>
+            <button id="findMasterBtn" class="hero-button">НАЙТИ МАСТЕРА</button>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">ПОЧЕМУ ВЫБИРАЮТ НАС</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>ТОП-МАСТЕРА</h3>
+                    <p>Только проверенные специалисты с опытом работы</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⭐</div>
+                    <h3>ГАРАНТИЯ КАЧЕСТВА</h3>
+                    <p>Если не понравится — вернем деньги</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>ПРЕДОПЛАТА 50%</h3>
+                    <p>Защита от отмен с обеих сторон</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const findMasterBtn = document.getElementById('findMasterBtn');
+            if (findMasterBtn) {
+                findMasterBtn.addEventListener('click', function() {
+                    window.location.href = 'services.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

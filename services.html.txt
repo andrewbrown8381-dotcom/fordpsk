@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выберите услугу - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .services-hero {
+            padding: 100px 0 60px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .page-title {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 20px;
+            margin-bottom: 60px;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 0 100px;
+        }
+        
+        .service-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(138, 43, 226, 0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(138, 43, 226, 0.3);
+        }
+        
+        .service-card:active {
+            transform: translateY(-5px);
+        }
+        
+        .service-icon {
+            font-size: 60px;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4));
+        }
+        
+        .service-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+        
+        .service-card p {
+            color: var(--text-gray);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .select-btn {
+            width: 150px;
+            height: 45px;
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        .select-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.5);
+        }
+        
+        .back-btn {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 10px;
+            color: var(--text-gray);
+            padding: 12px 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 768px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+                padding: 20px 0 60px;
+            }
+            
+            .page-title {
+                font-size: 36px;
+            }
+            
+            .page-subtitle {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="services.html" class="nav-link active"><i class="fas fa-spa"></i> Услуги</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero секция -->
+    <section class="services-hero">
+        <div class="container">
+            <!-- ИЗМЕНЕНИЕ: Вместо window.history.back() используем прямой переход на index.html -->
+            <button class="back-btn" onclick="window.location.href = 'index.html'">
+                <i class="fas fa-arrow-left"></i> На главную
+            </button>
+            
+            <div class="hero-content">
+                <h1 class="page-title">Выберите услугу</h1>
+                <p class="page-subtitle">Мы подберем лучшего мастера для выбранной услуги</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Сетка услуг -->
+    <section class="services-catalog">
+        <div class="container">
+            <div class="services-grid" id="servicesGrid">
+                <!-- Услуги загрузятся через JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+<script src="data.js"></script>
+    <script>
+        // Логика страницы услуг - ПРОСТАЯ РАБОЧАЯ ВЕРСИЯ
+        document.addEventListener('DOMContentLoaded', function() {
+            loadServices();
+        });
+
+        function loadServices() {
+            const servicesGrid = document.getElementById('servicesGrid');
+            
+            // Берем услуги из ТВОЕЙ базы данных
+            const services = Zapis5MinData.getServices();
+            
+            if (!services || services.length === 0) {
+                servicesGrid.innerHTML = '<p class="text-center" style="color: var(--text-gray); grid-column: 1/-1; padding: 40px;">Услуги временно недоступны</p>';
+                return;
+            }
+            
+            servicesGrid.innerHTML = '';
+            
+            services.forEach(service => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = 'service-card';
+                
+                serviceCard.innerHTML = `
+                    <div class="service-icon">${service.icon}</div>
+                    <h3>${service.name}</h3>
+                    <p>Профессиональные услуги от лучших мастеров</p>
+                    <button class="select-btn" onclick="selectService('${service.category}')">
+                        Выбрать
+                    </button>
+                `;
+                
+                servicesGrid.appendChild(serviceCard);
+            });
+        }
+
+        function selectService(category) {
+            // Сохраняем выбранную категорию
+            sessionStorage.setItem('selectedServiceCategory', category);
+            
+            // Переходим на страницу мастеров
+            window.location.href = `masters.html?service=${category}`;
+        }
+    </script>
+</body>
+</html>

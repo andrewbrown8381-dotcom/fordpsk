@@ -1,0 +1,123 @@
+// Основная логика и навигация
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Кнопка "НАЙТИ МАСТЕРА"
+    const findMasterBtn = document.getElementById('findMasterBtn');
+    if (findMasterBtn) {
+        findMasterBtn.addEventListener('click', function() {
+            window.location.href = 'services.html';
+        });
+    }
+
+    // Инициализация данных
+    initData();
+});
+
+// Инициализация данных в localStorage
+function initData() {
+    if (!localStorage.getItem('zapis5min_initialized')) {
+        // Создаем тестового админа
+        const adminUser = {
+            id: 1,
+            email: 'admin@zapis5min.ru',
+            password: 'admin123',
+            name: 'Администратор',
+            phone: '+79991234567',
+            role: 'admin',
+            is_verified: true,
+            created_at: new Date().toISOString()
+        };
+
+        // Сохраняем начальные данные
+        localStorage.setItem('users', JSON.stringify([adminUser]));
+        localStorage.setItem('zapis5min_initialized', 'true');
+    }
+}
+
+// Навигация между страницами
+function navigateTo(page, params = {}) {
+    let url = page;
+    if (Object.keys(params).length > 0) {
+        const queryString = new URLSearchParams(params).toString();
+        url += '?' + queryString;
+    }
+    window.location.href = url;
+}
+
+// Проверка авторизации
+function checkAuth() {
+    const currentUser = JSON.parse(localStorage.getItem('current_user'));
+    return currentUser || null;
+}
+
+// Выход из системы
+function logout() {
+    localStorage.removeItem('current_user');
+    window.location.href = 'index.html';
+}
+
+// Показать сообщение
+function showMessage(message, type = 'success') {
+    // Удаляем старые сообщения
+    const oldMessage = document.querySelector('.message-alert');
+    if (oldMessage) oldMessage.remove();
+
+    // Создаем новое сообщение
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `message-alert ${type}`;
+    alertDiv.textContent = message;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 500;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    if (type === 'success') {
+        alertDiv.style.background = 'linear-gradient(45deg, #8A2BE2, #9370DB)';
+    } else if (type === 'error') {
+        alertDiv.style.background = 'linear-gradient(45deg, #ff4757, #ff6b6b)';
+    } else {
+        alertDiv.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
+    }
+
+    document.body.appendChild(alertDiv);
+
+    // Автоматическое скрытие
+    setTimeout(() => {
+        alertDiv.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 3000);
+}
+
+// Добавляем стили для анимации сообщений
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);

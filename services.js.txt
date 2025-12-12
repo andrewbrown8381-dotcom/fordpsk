@@ -1,0 +1,55 @@
+// Логика страницы услуг
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadServices();
+    
+    // Проверяем параметр из URL для предварительного выбора
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceParam = urlParams.get('service');
+    if (serviceParam) {
+        // Можно сделать предварительный выбор, если нужно
+    }
+});
+
+function loadServices() {
+    const servicesGrid = document.getElementById('servicesGrid');
+    const services = BeautyProData.getServices();
+    
+    if (!services.length) {
+        servicesGrid.innerHTML = '<p class="text-center">Услуги временно недоступны</p>';
+        return;
+    }
+    
+    servicesGrid.innerHTML = '';
+    
+    services.forEach(service => {
+        const serviceCard = document.createElement('div');
+        serviceCard.className = 'service-card';
+        
+        serviceCard.innerHTML = `
+            <div class="service-icon">${service.icon}</div>
+            <h3>${service.name}</h3>
+            <p>Профессиональные услуги от лучших мастеров</p>
+            <button class="select-btn" onclick="selectService('${service.category}')">
+                Выбрать
+            </button>
+        `;
+        
+        servicesGrid.appendChild(serviceCard);
+    });
+}
+
+function selectService(category) {
+    // Сохраняем выбранную категорию
+    sessionStorage.setItem('selectedServiceCategory', category);
+    
+    // Переходим на страницу мастеров
+    window.location.href = `masters.html?service=${category}`;
+}
+
+// Функция для получения названия услуги по категории
+function getServiceNameByCategory(category) {
+    const services = BeautyProData.getServices();
+    const service = services.find(s => s.category === category);
+    return service ? service.name : 'Услуга';
+}

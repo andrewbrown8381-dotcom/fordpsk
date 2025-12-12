@@ -1,0 +1,151 @@
+// База данных Запись за 5 минут (хранится в localStorage)
+
+const Zapis5MinData = {
+    // Инициализация данных
+    init: function() {
+        // Мастера
+        if (!localStorage.getItem('masters')) {
+            const masters = [
+                {
+                    id: 1,
+                    name: "Анна Петрова",
+                    age: 28,
+                    city: "Москва",
+                    experience: 5,
+                    rating: 4.8,
+                    reviews_count: 154,
+                    avatar_color: "#8A2BE2",
+                    telegram: "@anna_beauty",
+                    phone: "+79999876543",
+                    specialties: ["MANICURE_PEDICURE", "WOMEN_HAIRCUT"],
+                    description: "Профессиональный мастер с 5-летним опытом.",
+                    services: [
+                        { id: 1, name: "Маникюр", price: 2500, duration: 60, category: "MANICURE_PEDICURE" },
+                        { id: 2, name: "Педикюр", price: 3000, duration: 90, category: "MANICURE_PEDICURE" },
+                        { id: 3, name: "Комплекс", price: 5000, duration: 120, category: "MANICURE_PEDICURE" }
+                    ],
+                    work_schedule: {
+                        monday: ["10:00-13:00", "14:00-18:00"],
+                        tuesday: ["10:00-13:00", "14:00-18:00"],
+                        wednesday: ["10:00-13:00", "14:00-18:00"],
+                        thursday: ["10:00-13:00", "14:00-18:00"],
+                        friday: ["10:00-13:00", "14:00-18:00"],
+                        saturday: [],
+                        sunday: []
+                    }
+                }
+            ];
+            localStorage.setItem('masters', JSON.stringify(masters));
+        }
+
+        // Услуги
+        if (!localStorage.getItem('services')) {
+            const services = [
+                { id: 1, name: "Маникюр и педикюр", icon: "💅🏻", category: "MANICURE_PEDICURE" },
+                { id: 2, name: "Мужская стрижка", icon: "✂️", category: "MEN_HAIRCUT" },
+                { id: 3, name: "Женская стрижка", icon: "💇‍♀️", category: "WOMEN_HAIRCUT" },
+                { id: 4, name: "Брови", icon: "👁️", category: "EYEBROWS" },
+                { id: 5, name: "Ресницы", icon: "👁️‍🗨️", category: "EYELASHES" }
+            ];
+            localStorage.setItem('services', JSON.stringify(services));
+        }
+
+        // Записи
+        if (!localStorage.getItem('bookings')) {
+            localStorage.setItem('bookings', JSON.stringify([]));
+        }
+
+        // Отзывы
+        if (!localStorage.getItem('reviews')) {
+            localStorage.setItem('reviews', JSON.stringify([]));
+        }
+    },
+
+    // Получение данных
+    getMasters: function() {
+        return JSON.parse(localStorage.getItem('masters') || '[]');
+    },
+
+    getServices: function() {
+        return JSON.parse(localStorage.getItem('services') || '[]');
+    },
+
+    getBookings: function() {
+        return JSON.parse(localStorage.getItem('bookings') || '[]');
+    },
+
+    getReviews: function() {
+        return JSON.parse(localStorage.getItem('reviews') || '[]');
+    },
+
+    getUsers: function() {
+        return JSON.parse(localStorage.getItem('users') || '[]');
+    },
+
+    // Обновление данных
+    updateMasters: function(masters) {
+        localStorage.setItem('masters', JSON.stringify(masters));
+    },
+
+    updateBookings: function(bookings) {
+        localStorage.setItem('bookings', JSON.stringify(bookings));
+    },
+
+    updateReviews: function(reviews) {
+        localStorage.setItem('reviews', JSON.stringify(reviews));
+    },
+
+    updateUsers: function(users) {
+        localStorage.setItem('users', JSON.stringify(users));
+    },
+
+    // Поиск мастера по ID
+    getMasterById: function(id) {
+        const masters = this.getMasters();
+        return masters.find(master => master.id === parseInt(id));
+    },
+
+    // Поиск услуги по ID
+    getServiceById: function(id) {
+        const services = this.getServices();
+        return services.find(service => service.id === parseInt(id));
+    },
+
+    // Добавление новой записи
+    addBooking: function(bookingData) {
+        const bookings = this.getBookings();
+        const newId = bookings.length > 0 ? Math.max(...bookings.map(b => b.id)) + 1 : 1;
+        
+        const booking = {
+            id: newId,
+            ...bookingData,
+            created_at: new Date().toISOString(),
+            status: 'pending_payment',
+            booking_code: 'Z-' + new Date().getFullYear() + '-' + String(newId).padStart(6, '0')
+        };
+        
+        bookings.push(booking);
+        this.updateBookings(bookings);
+        return booking;
+    },
+
+    // Добавление отзыва
+    addReview: function(reviewData) {
+        const reviews = this.getReviews();
+        const newId = reviews.length > 0 ? Math.max(...reviews.map(r => r.id)) + 1 : 1;
+        
+        const review = {
+            id: newId,
+            ...reviewData,
+            created_at: new Date().toISOString(),
+            verified: true
+        };
+        
+        reviews.push(review);
+        this.updateReviews(reviews);
+        return review;
+    }
+};
+
+// Инициализируем данные при загрузке
+Zapis5MinData.init();

@@ -1,0 +1,197 @@
+// Логика страницы мастеров
+
+let allMasters = [];
+let filteredMasters = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadMasters();
+    setupFilters();
+    
+    // Проверяем выбранную услугу
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceCategory = urlParams.get('service') || sessionStorage.getItem('selectedServiceCategory');
+    
+    if (serviceCategory) {
+        document.title = `Мастера по ${getServiceNameByCategory(serviceCategory)} - BeautyPro`;
+        filterByService(serviceCategory);
+    }
+});
+
+function loadMasters() {
+    allMasters = BeautyProData.getMasters();
+    filteredMasters = [...allMasters];
+    renderMasters();
+}
+
+function renderMasters() {
+    const mastersGrid = document.getElementById('mastersGrid');
+    
+    if (!filteredMasters.length) {
+        mastersGrid.innerHTML = `
+            <div class="no-results" style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <i class="fas fa-users-slash" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
+                <h3 style="color: #666; margin-bottom: 10px;">Мастера не найдены</h3>
+                <p style="color: #999;">Попробуйте изменить параметры фильтрации</p>
+            </div>
+        `;
+        return;
+    }
+    
+    mastersGrid.innerHTML = '';
+    
+    filteredMasters.forEach(master => {
+        const masterCard = document.createElement('div');
+        masterCard.className = 'master-card';
+        
+        // Получаем инициалы для аватара
+        const initials = getInitials(master.name);
+        
+        // Формируем список специализаций
+        const specialties = master.specialties.map(cat => {
+            switch(cat) {
+                case 'MANICURE_PEDICURE': return 'Маникюр';
+                case 'MEN_HAIRCUT': return 'Мужская стрижка';
+                case 'WOMEN_HAIRCUT': return 'Женская стрижка';
+                case 'EYEBROWS': return 'Брови';
+                case 'EYELASHES': return 'Ресницы';
+                default: return cat;
+            }
+        }).join(', ');
+        
+        // Создаем звезды рейтинга
+        const stars = getStarsHtml(master.rating);
+        
+        masterCard.innerHTML = `
+            <div class="master-content">
+                <div class="master-avatar">
+                    <div class="avatar-circle" style="background: ${master.avatar_color}">
+                        ${initials}
+                    </div>
+                </div>
+                <div class="master-info">
+                    <h3 class="master-name">${master.name}</h3>
+                    <div class="master-specialties">
+                        ${specialties.split(', ').map(spec => `<span class="specialty-item">${spec}</span>`).join('')}
+                    </div>
+                    <div class="master-rating">
+                        <div class="stars">${stars}</div>
+                        <span class="rating-number">${master.rating}</span>
+                        <span class="reviews-count">(${master.reviews_count})</span>
+                    </div>
+                    <div class="master-experience">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Опыт: ${master.experience} лет</span>
+                    </div>
+                    <div class="master-experience">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>${master.city}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="master-footer">
+                <button class="select-master-btn" onclick="selectMaster(${master.id})">
+                    Выбрать мастера
+                </button>
+            </div>
+        `;
+        
+        mastersGrid.appendChild(masterCard);
+    });
+}
+
+function setupFilters() {
+    const sortSelect = document.getElementById('sortSelect');
+    const filterAvailable = document.getElementById('filterAvailable');
+    const filterRating = document.getElementById('filterRating');
+    const filterExperience = document.getElementById('filterExperience');
+    
+    // Назначаем обработчики
+    sortSelect.addEventListener('change', applyFilters);
+    filterAvailable.addEventListener('change', applyFilters);
+    filterRating.addEventListener('change', applyFilters);
+    filterExperience.addEventListener('change', applyFilters);
+}
+
+function applyFilters() {
+    const sortSelect = document.getElementById('sortSelect');
+    const filterAvailable = document.getElementById('filterAvailable');
+    const filterRating = document.getElementById('filterRating');
+    const filterExperience = document.getElementById('filterExperience');
+    
+    // Фильтрация
+    filteredMasters = allMasters.filter(master => {
+        let pass = true;
+        
+        // Фильтр по рейтингу
+        if (filterRating.checked && master.rating < 4.5) {
+            pass = false;
+        }
+        
+        // Фильтр по опыту
+        if (filterExperience.checked && master.experience < 3) {
+            pass = false;
+        }
+        
+        // Фильтр по доступности (упрощенный)
+        if (filterAvailable.checked) {
+            // Здесь можно добавить проверку текущего времени
+            // Для демо просто пропускаем всех
+        }
+        
+        return pass;
+    });
+    
+    // Сортировка
+    const sortValue = sortSelect.value;
+    filteredMasters.sort((a, b) => {
+        switch(sortValue) {
+            case 'rating_desc': return b.rating - a.rating;
+            case 'rating_asc': return a.rating - b.rating;
+            case 'experience_desc': return b.experience - a.experience;
+            case 'experience_asc': return a.experience - b.experience;
+            case 'price_asc':
+                // Для демо используем минимальную цену услуги
+                const priceA = a.services.length ? Math.min(...a.services.map(s => s.price)) : 0;
+                const priceB = b.services.length ? Math.min(...b.services.map(s => s.price)) : 0;
+                return priceA - priceB;
+            default: return 0;
+        }
+    });
+    
+    renderMasters();
+}
+
+function filterByService(category) {
+    filteredMasters = allMasters.filter(master => 
+        master.specialties.includes(category)
+    );
+    renderMasters();
+}
+
+function selectMaster(masterId) {
+    sessionStorage.setItem('selectedMasterId', masterId);
+    window.location.href = `master-${masterId}.html`;
+}
+
+function goBackToServices() {
+    window.location.href = 'services.html';
+}
+
+// Вспомогательные функции
+function getInitials(name) {
+    return name.split(' ').map(word => word[0]).join('').toUpperCase();
+}
+
+function getStarsHtml(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= Math.floor(rating)) {
+            stars += '<i class="fas fa-star"></i>';
+        } else if (i === Math.ceil(rating) && rating % 1 >= 0.5) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            stars += '<i class="far fa-star"></i>';
+        }
+    }
+    return stars;
+}

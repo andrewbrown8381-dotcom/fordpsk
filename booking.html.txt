@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ОСНОВНЫЕ СТИЛИ ДЛЯ СТРАНИЦЫ ЗАПИСИ */
+        body {
+            background: #0a0a0a;
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .booking-wrapper {
+            min-height: calc(100vh - 80px);
+            padding: 40px 0 80px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+        }
+        
+        /* ШАГИ */
+        .booking-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 60px;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -30px;
+            width: 20px;
+            height: 2px;
+            background: rgba(138, 43, 226, 0.3);
+        }
+        
+        .step:last-child::after {
+            display: none;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(138, 43, 226, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-gray);
+            font-size: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .step.active .step-number {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            color: white;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .step.completed .step-number {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+        
+        .step-text {
+            font-size: 16px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .step.active .step-text {
+            color: var(--text-light);
+        }
+        
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .booking-content {
+            background: #1a1a1a;
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            margin-bottom: 40px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .booking-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+        }
+        
+        .section-title {
+            font-size: 32px;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        /* ИНФОРМАЦИЯ О МАСТЕРЕ */
+        .master-info-card {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .master-avatar-small {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            flex-shrink: 0;
+            border: 3px solid rgba(138, 43, 226, 0.5);
+        }
+        
+        .master-details h3 {
+            font-size: 24px;
+            color: var(--text-light);
+            margin: 0 0 10px 0;
+        }
+        
+        .master-details p {
+            margin: 5px 0;
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* КАЛЕНДАРЬ - СОВРЕМЕННЫЙ ДИЗАЙН */
+        .calendar-container {
+            margin: 40px 0;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .calendar-nav-btn {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 12px;
+            padding: 12px 20px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calendar-nav-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+        
+        .calendar-month {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            padding: 15px 0;
+            color: var(--text-gray);
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .calendar-day {
+            text-align: center;
+            padding: 20px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid transparent;
+            font-weight: 500;
+        }
+        
+        .calendar-day:hover:not(.disabled):not(.past):not(.booked) {
+            background: rgba(138, 43, 226, 0.1);
+            border-color: rgba(138, 43, 226, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .calendar-day.selected {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            color: white;
+            border-color: #8A2BE2;
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .calendar-day.today {
+            border-color: #2ecc71;
+        }
+        
+        .calendar-day.today::before {
+            content: 'Сегодня';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #2ecc71;
+            font-weight: 600;
+        }
+        
+        .calendar-day.past {
+            color: #666;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .calendar-day.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: #444;
+            cursor: not-allowed;
+        }
+        
+        .calendar-day.booked {
+            color: #ff4757;
+            cursor: not-allowed;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calendar-day.booked::after {
+            content: '✗';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: #ff4757;
+            font-size: 12px;
+        }
+        
+        /* ВЫБОР ВРЕМЕНИ */
+        .time-slots-container {
+            margin: 40px 0;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .selected-date-display {
+            text-align: center;
+            font-size: 20px;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #8A2BE2;
+        }
+        
+        .selected-date-display strong {
+            color: var(--text-light);
+            font-size: 22px;
+        }
+        
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+        
+        .time-slot {
+            padding: 20px;
+            border: 2px solid rgba(138, 43, 226, 0.2);
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .time-slot:hover:not(.booked):not(.disabled) {
+            border-color: #8A2BE2;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.2);
+        }
+        
+        .time-slot.selected {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border-color: #8A2BE2;
+            color: white;
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .time-slot.booked {
+            background: rgba(255, 71, 87, 0.1);
+            color: #666;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            border-color: rgba(255, 71, 87, 0.2);
+        }
+        
+        .time-slot.disabled {
+            background: rgba(255, 255, 255, 0.05);
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        /* ПОДТВЕРЖДЕНИЕ */
+        .booking-summary {
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid rgba(138, 43, 226, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: var(--text-gray);
+            font-size: 16px;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 18px;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        .prepayment-notice {
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 4px solid #ffc107;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .notice-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffc107;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .notice-text {
+            color: var(--text-gray);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* КНОПКИ ДЕЙСТВИЙ */
+        .booking-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            gap: 20px;
+        }
+        
+        .action-btn {
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .back-btn {
+            background: rgba(138, 43, 226, 0.1);
+            color: var(--text-gray);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+        
+        .next-btn {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            color: white;
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+        }
+        
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(46, 204, 113, 0.4);
+        }
+        
+        /* АНИМАЦИИ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 1024px) {
+            .booking-steps {
+                gap: 20px;
+            }
+            
+            .step::after {
+                display: none;
+            }
+            
+            .calendar-grid {
+                gap: 8px;
+            }
+            
+            .calendar-day {
+                padding: 15px 8px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .booking-content {
+                padding: 30px 20px;
+            }
+            
+            .booking-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .booking-actions {
+                flex-direction: column;
+            }
+            
+            .time-slots-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+            
+            .calendar-day {
+                padding: 12px 5px;
+                font-size: 13px;
+            }
+            
+            .calendar-day-header {
+                font-size: 12px;
+                padding: 10px 0;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
+            
+            .master-info-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .time-slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-btn {
+                padding: 15px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <section class="booking-wrapper">
+        <div class="container">
+            <!-- Шаги -->
+            <div class="booking-steps">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Выбор даты</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Выбор времени</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Подтверждение</div>
+                </div>
+            </div>
+            
+            <!-- Шаг 1: Выбор даты -->
+            <div id="step1-content" class="booking-content">
+                <h2 class="section-title">ШАГ 1: Выберите дату</h2>
+                
+                <!-- Информация о мастере -->
+                <div class="master-info-card" id="masterInfoCard">
+                    <!-- Заполнится через JS -->
+                </div>
+                
+                <!-- Календарь -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">
+                            <i class="fas fa-chevron-left"></i> Предыдущий
+                        </button>
+                        <div class="calendar-month" id="currentMonth">Апрель 2024</div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">
+                            Следующий <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Календарь загрузится через JS -->
+                    </div>
+                </div>
+                
+                <div class="booking-actions">
+                    <button class="action-btn back-btn" onclick="goToHome()">
+                        <i class="fas fa-home"></i> На главную
+                    </button>
+                    <button class="action-btn next-btn" id="nextToStep2" disabled onclick="nextToStep2()">
+                        Далее: Выбор времени <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Шаг 2: Выбор времени -->
+            <div id="step2-content" class="booking-content" style="display: none;">
+                <h2 class="section-title">ШАГ 2: Выберите время</h2>
+                
+                <div class="selected-date-display">
+                    Доступное время на <strong id="selectedDateDisplay">15 апреля 2024</strong>:
+                </div>
+                
+                <div class="time-slots-grid" id="timeSlotsGrid">
+                    <!-- Временные слоты загрузятся через JS -->
+                </div>
+                
+                <div class="booking-actions">
+                    <button class="action-btn back-btn" onclick="backToStep1()">
+                        <i class="fas fa-arrow-left"></i> Назад к дате
+                    </button>
+                    <button class="action-btn next-btn" id="nextToStep3" disabled onclick="nextToStep3()">
+                        Далее: Подтверждение <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Шаг 3: Подтверждение -->
+            <div id="step3-content" class="booking-content" style="display: none;">
+                <h2 class="section-title">ШАГ 3: Подтверждение записи</h2>
+                
+                <div class="booking-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Услуга:</span>
+                        <span class="summary-value" id="summaryService">Маникюр</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Мастер:</span>
+                        <span class="summary-value" id="summaryMaster">Анна Петрова</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Дата и время:</span>
+                        <span class="summary-value" id="summaryDateTime">15 апреля 2024, 14:30</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Стоимость услуги:</span>
+                        <span class="summary-value" id="summaryPrice">2 500 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Предоплата (50%):</span>
+                        <span class="summary-value" id="summaryPrepayment">1 250 ₽</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>К оплате на месте:</span>
+                        <span id="summaryRemaining">1 250 ₽</span>
+                    </div>
+                </div>
+                
+                <div class="prepayment-notice">
+                    <div class="notice-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Важная информация о предоплате</strong>
+                    </div>
+                    <p class="notice-text">
+                        Предоплата защищает обе стороны:<br>
+                        • Гарантирует бронь времени<br>
+                        • Не возвращается при отмене < 24 часа<br>
+                        • Полная стоимость оплачивается на месте
+                    </p>
+                </div>
+                
+                <div class="booking-actions">
+                    <button class="action-btn back-btn" onclick="backToStep2()">
+                        <i class="fas fa-arrow-left"></i> Назад ко времени
+                    </button>
+                    <button class="action-btn confirm-btn" onclick="confirmBooking()">
+                        <i class="fas fa-check-circle"></i> ОПЛАТИТЬ ПРЕДОПЛАТУ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // ЛОГИКА СТРАНИЦЫ ЗАПИСИ - ПОЛНОСТЬЮ ПЕРЕРАБОТАННАЯ
+        
+        let currentStep = 1;
+        let bookingData = {};
+        let selectedDate = null;
+        let selectedTime = null;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let masterWorkSchedule = {};
+
+        // Загрузка при старте
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница записи загружена');
+            
+            // Проверяем авторизацию
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (!currentUser) {
+                showMessage('Для записи необходимо войти в систему', 'error');
+                setTimeout(() => {
+                    window.location.href = 'auth.html?redirect=booking';
+                }, 2000);
+                return;
+            }
+            
+            // Загружаем данные записи
+            const savedData = sessionStorage.getItem('bookingData');
+            if (!savedData) {
+                showMessage('Данные записи не найдены. Сначала выберите мастера и услугу.', 'error');
+                setTimeout(() => window.location.href = 'services.html', 2000);
+                return;
+            }
+            
+            bookingData = JSON.parse(savedData);
+            console.log('Данные записи:', bookingData);
+            
+            // Загружаем информацию о мастере
+            const master = Zapis5MinData.getMasterById(bookingData.masterId);
+            if (!master) {
+                showMessage('Мастер не найден', 'error');
+                setTimeout(() => window.location.href = 'masters.html', 2000);
+                return;
+            }
+            
+            // Сохраняем расписание мастера
+            masterWorkSchedule = master.work_schedule || createDefaultWorkSchedule(master.id);
+            
+            // Заполняем информацию о мастере
+            fillMasterInfo(master);
+            
+            // Инициализируем календарь
+            initCalendar();
+            
+            // Заполняем сводку данными из sessionStorage если есть
+            updateSummaryFromData();
+            
+            // Проверяем есть ли уже выбранная дата
+            const savedDate = sessionStorage.getItem('selectedBookingDate');
+            if (savedDate) {
+                const date = new Date(savedDate);
+                selectDate(date);
+                updateCalendarDisplay();
+                generateCalendar();
+            }
+        });
+
+        // Заполнение информации о мастере
+        function fillMasterInfo(master) {
+            const masterInfoCard = document.getElementById('masterInfoCard');
+            const initials = getInitials(master.name);
+            
+            masterInfoCard.innerHTML = `
+                <div class="master-avatar-small" style="background: ${master.avatar_color || '#8A2BE2'}">
+                    ${initials}
+                </div>
+                <div class="master-details">
+                    <h3>${master.name}</h3>
+                    <p><i class="fas fa-star" style="color: #FFD700;"></i> Рейтинг: ${master.rating || 0} (${master.reviews_count || 0} отзывов)</p>
+                    <p><i class="fas fa-briefcase"></i> Опыт: ${master.experience || 0} лет</p>
+                    <p><i class="fas fa-map-marker-alt"></i> ${master.city || 'Не указан'}</p>
+                </div>
+            `;
+            
+            // Сохраняем данные мастера для сводки
+            bookingData.masterName = master.name;
+            bookingData.masterCity = master.city;
+        }
+
+        // Инициализация календаря
+        function initCalendar() {
+            updateCalendarDisplay();
+            generateCalendar();
+        }
+
+        // Обновление отображения месяца
+        function updateCalendarDisplay() {
+            const monthNames = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            
+            document.getElementById('currentMonth').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+        }
+
+        // Генерация календаря
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+            
+            // Заголовки дней недели
+            const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            
+            // Первый день месяца
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const startingDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            
+            // Последний день месяца
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const totalDays = lastDay.getDate();
+            
+            // Сегодняшняя дата
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Прошлые дни
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day disabled';
+                emptyDay.textContent = '';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Дни месяца
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // Проверяем, сегодня ли это
+                if (date.getTime() === today.getTime()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Проверяем, прошедшая ли это дата
+                if (date < today) {
+                    dayElement.classList.add('past');
+                }
+                
+                // Проверяем, работает ли мастер в этот день
+                const dayOfWeek = date.getDay();
+                const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                const weekdayKey = weekdays[dayOfWeek];
+                
+                if (!masterWorkSchedule[weekdayKey] || masterWorkSchedule[weekdayKey].length === 0) {
+                    dayElement.classList.add('disabled');
+                }
+                
+                // Проверяем, занята ли дата
+                const bookings = Zapis5MinData.getBookings();
+                const isBooked = bookings.some(booking => {
+                    const bookingDate = new Date(booking.date);
+                    return bookingDate.toDateString() === date.toDateString() && 
+                           booking.master_id === bookingData.masterId &&
+                           booking.status !== 'cancelled';
+                });
+                
+                if (isBooked) {
+                    dayElement.classList.add('booked');
+                }
+                
+                // Если дата не прошедшая и не заблокирована
+                if (!dayElement.classList.contains('past') && 
+                    !dayElement.classList.contains('disabled') &&
+                    !dayElement.classList.contains('booked')) {
+                    
+                    dayElement.addEventListener('click', () => selectDate(date));
+                    
+                    // Если это выбранная дата
+                    if (selectedDate && selectedDate.toDateString() === date.toDateString()) {
+                        dayElement.classList.add('selected');
+                    }
+                }
+                
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        // Выбор даты
+        function selectDate(date) {
+            selectedDate = date;
+            generateCalendar();
+            
+            // Разблокируем кнопку "Далее"
+            document.getElementById('nextToStep2').disabled = false;
+            
+            // Сохраняем в bookingData
+            bookingData.date = date.toISOString().split('T')[0];
+            
+            // Сохраняем в sessionStorage
+            sessionStorage.setItem('selectedBookingDate', date.toISOString());
+            
+            showMessage(`Выбрана дата: ${formatDate(date)}`, 'success');
+        }
+
+        // Изменение месяца
+        function changeMonth(delta) {
+            currentMonth += delta;
+            
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            
+            updateCalendarDisplay();
+            generateCalendar();
+        }
+
+        // Переход ко второму шагу
+        function nextToStep2() {
+            if (!selectedDate) {
+                showMessage('Пожалуйста, выберите дату', 'error');
+                return;
+            }
+            
+            // Обновляем отображение даты
+            document.getElementById('selectedDateDisplay').textContent = formatDateFull(selectedDate);
+            
+            // Показываем доступные временные слоты
+            generateTimeSlots();
+            
+            // Переключаем шаги
+            switchStep(2);
+        }
+
+        // Генерация временных слотов
+        function generateTimeSlots() {
+            const timeSlotsGrid = document.getElementById('timeSlotsGrid');
+            timeSlotsGrid.innerHTML = '';
+            
+            if (!selectedDate) return;
+            
+            // Получаем день недели
+            const dayOfWeek = selectedDate.getDay();
+            const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const weekdayKey = weekdays[dayOfWeek];
+            
+            // Получаем рабочие интервалы мастера
+            const workIntervals = masterWorkSchedule[weekdayKey] || [];
+            
+            // Генерируем временные слоты
+            let allSlots = [];
+            
+            workIntervals.forEach(interval => {
+                const [startTime, endTime] = interval.split('-');
+                const slots = generateSlotsFromInterval(startTime, endTime);
+                allSlots = allSlots.concat(slots);
+            });
+            
+            // Получаем существующие записи на эту дату
+            const bookings = Zapis5MinData.getBookings();
+            const bookedSlots = bookings
+                .filter(booking => {
+                    const bookingDate = new Date(booking.date);
+                    return bookingDate.toDateString() === selectedDate.toDateString() && 
+                           booking.master_id === bookingData.masterId &&
+                           booking.status !== 'cancelled';
+                })
+                .map(booking => booking.time);
+            
+            // Создаем элементы слотов
+            if (allSlots.length === 0) {
+                timeSlotsGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-gray);">
+                        <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <p>На эту дату нет доступного времени</p>
+                        <p style="font-size: 14px; margin-top: 10px;">Мастер не работает в этот день</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allSlots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot;
+                
+                // Проверяем, занят ли слот
+                if (bookedSlots.includes(slot)) {
+                    slotElement.classList.add('booked');
+                } else {
+                    slotElement.addEventListener('click', () => selectTimeSlot(slot, slotElement));
+                }
+                
+                // Если это выбранный слот
+                if (selectedTime === slot) {
+                    slotElement.classList.add('selected');
+                }
+                
+                timeSlotsGrid.appendChild(slotElement);
+            });
+        }
+
+        // Генерация слотов из интервала
+        function generateSlotsFromInterval(startTime, endTime) {
+            const slots = [];
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            let currentHour = startHour;
+            let currentMinute = startMinute;
+            
+            while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+                const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+                slots.push(timeString);
+                
+                // Добавляем 30 минут
+                currentMinute += 30;
+                if (currentMinute >= 60) {
+                    currentMinute = 0;
+                    currentHour++;
+                }
+            }
+            
+            return slots;
+        }
+
+        // Выбор временного слота
+        function selectTimeSlot(time, element) {
+            // Убираем выделение со всех слотов
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный слот
+            element.classList.add('selected');
+            selectedTime = time;
+            
+            // Разблокируем кнопку "Далее"
+            document.getElementById('nextToStep3').disabled = false;
+            
+            // Сохраняем в bookingData
+            bookingData.time = time;
+            
+            showMessage(`Выбрано время: ${time}`, 'success');
+        }
+
+        // Переход к третьему шагу
+        function nextToStep3() {
+            if (!selectedTime) {
+                showMessage('Пожалуйста, выберите время', 'error');
+                return;
+            }
+            
+            // Обновляем сводку
+            updateSummary();
+            
+            // Переключаем шаги
+            switchStep(3);
+        }
+
+        // Обновление сводки
+        function updateSummary() {
+            // Получаем информацию об услуге
+            const master = Zapis5MinData.getMasterById(bookingData.masterId);
+            let service = null;
+            
+            if (master && master.services) {
+                service = master.services.find(s => s.id === bookingData.serviceId);
+            }
+            
+            if (!service) {
+                // Если услуга не найдена, используем дефолтные значения
+                service = {
+                    name: 'Услуга',
+                    price: 2000
+                };
+            }
+            
+            // Форматируем дату
+            const dateString = selectedDate ? formatDateFull(selectedDate) : 'не выбрана';
+            const timeString = selectedTime || 'не выбрано';
+            
+            // Расчеты
+            const servicePrice = service.price || 2000;
+            const prepayment = Math.floor(servicePrice * 0.5);
+            const remaining = servicePrice - prepayment;
+            
+            // Заполняем сводку
+            document.getElementById('summaryService').textContent = service.name;
+            document.getElementById('summaryMaster').textContent = bookingData.masterName || 'Мастер';
+            document.getElementById('summaryDateTime').textContent = `${dateString}, ${timeString}`;
+            document.getElementById('summaryPrice').textContent = servicePrice.toLocaleString() + ' ₽';
+            document.getElementById('summaryPrepayment').textContent = prepayment.toLocaleString() + ' ₽';
+            document.getElementById('summaryRemaining').textContent = remaining.toLocaleString() + ' ₽';
+            
+            // Сохраняем данные
+            bookingData.servicePrice = servicePrice;
+            bookingData.prepayment = prepayment;
+            bookingData.remaining = remaining;
+            bookingData.serviceName = service.name;
+        }
+
+        // Обновление сводки из данных sessionStorage
+        function updateSummaryFromData() {
+            const savedBookingData = sessionStorage.getItem('selectedMasterData');
+            if (savedBookingData) {
+                const masterData = JSON.parse(savedBookingData);
+                bookingData.masterName = masterData.name;
+                bookingData.masterCity = masterData.city;
+            }
+        }
+
+        // Подтверждение записи
+        function confirmBooking() {
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (!currentUser) {
+                showMessage('Сессия истекла. Пожалуйста, войдите снова', 'error');
+                setTimeout(() => window.location.href = 'auth.html', 2000);
+                return;
+            }
+            
+            if (!selectedDate || !selectedTime) {
+                showMessage('Пожалуйста, выберите дату и время', 'error');
+                return;
+            }
+            
+            // Создаем запись
+            const booking = {
+                client_id: currentUser.id,
+                master_id: bookingData.masterId,
+                service_id: bookingData.serviceId,
+                date: selectedDate.toISOString().split('T')[0],
+                time: selectedTime,
+                price: bookingData.servicePrice || 2000,
+                prepayment: bookingData.prepayment || 1000,
+                status: 'pending_payment',
+                created_at: new Date().toISOString()
+            };
+            
+            // Сохраняем запись
+            const newBooking = Zapis5MinData.addBooking(booking);
+            
+            // Сохраняем для страницы оплаты
+            sessionStorage.setItem('currentBooking', JSON.stringify(newBooking));
+            
+            // Очищаем временные данные
+            sessionStorage.removeItem('selectedBookingDate');
+            
+            // Показываем сообщение об успехе
+            showMessage('Запись создана! Переходим к оплате...', 'success');
+            
+            // Переходим на страницу оплаты
+            setTimeout(() => {
+                window.location.href = 'payment.html';
+            }, 1500);
+        }
+
+        // Управление шагами
+        function switchStep(step) {
+            currentStep = step;
+            
+            // Обновляем отображение шагов
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                const contentElement = document.getElementById(`step${i}-content`);
+                
+                if (i === step) {
+                    stepElement.classList.add('active');
+                    contentElement.style.display = 'block';
+                } else {
+                    stepElement.classList.remove('active');
+                    stepElement.classList.remove('completed');
+                    contentElement.style.display = 'none';
+                    
+                    if (i < step) {
+                        stepElement.classList.add('completed');
+                    }
+                }
+            }
+        }
+
+        // Навигация между шагами
+        function backToStep1() {
+            switchStep(1);
+        }
+
+        function backToStep2() {
+            switchStep(2);
+            generateTimeSlots();
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Вспомогательные функции
+        function getInitials(name) {
+            if (!name) return 'МК';
+            return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long'
+            });
+        }
+
+        function formatDateFull(date) {
+            return date.toLocaleDateString('ru-RU', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function createDefaultWorkSchedule(masterId) {
+            // Расписание по умолчанию для нового мастера
+            const schedule = {
+                monday: ["10:00-13:00", "14:00-18:00"],
+                tuesday: ["10:00-13:00", "14:00-18:00"],
+                wednesday: ["10:00-13:00", "14:00-18:00"],
+                thursday: ["10:00-13:00", "14:00-18:00"],
+                friday: ["10:00-13:00", "14:00-18:00"],
+                saturday: ["11:00-15:00"],
+                sunday: []
+            };
+            
+            // Сохраняем в localStorage
+            localStorage.setItem(`master_schedule_${masterId}`, JSON.stringify(schedule));
+            
+            return schedule;
+        }
+
+        // Функция показа сообщений
+        function showMessage(message, type = 'success') {
+            // Удаляем старые сообщения
+            const oldMessage = document.querySelector('.message-alert');
+            if (oldMessage) oldMessage.remove();
+
+            // Создаем новое сообщение
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `message-alert ${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 500;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            if (type === 'success') {
+                alertDiv.style.background = 'linear-gradient(45deg, #8A2BE2, #9370DB)';
+            } else if (type === 'error') {
+                alertDiv.style.background = 'linear-gradient(45deg, #ff4757, #ff6b6b)';
+            } else {
+                alertDiv.style.background = 'linear-gradient(45deg, #2196F3, #1976D2)';
+            }
+
+            document.body.appendChild(alertDiv);
+
+            // Автоматическое скрытие
+            setTimeout(() => {
+                alertDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

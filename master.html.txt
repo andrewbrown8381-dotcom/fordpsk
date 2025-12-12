@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль мастера - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стили для страницы мастера - адаптированы под вашу тему */
+        .master-profile {
+            padding: 60px 0 40px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+        }
+        
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .back-btn {
+            background: rgba(138, 43, 226, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            border-radius: 10px;
+            color: var(--text-gray);
+            padding: 12px 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--text-light);
+        }
+        
+        .profile-content {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-avatar {
+            flex-shrink: 0;
+        }
+        
+        .avatar-large {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(138, 43, 226, 0.5);
+        }
+        
+        .profile-info {
+            flex-grow: 1;
+        }
+        
+        .profile-name {
+            font-size: 32px;
+            color: var(--text-light);
+            margin: 0 0 15px 0;
+        }
+        
+        .profile-details {
+            margin-bottom: 30px;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--text-gray);
+        }
+        
+        .detail-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .telegram-btn-container {
+            margin-top: 40px;
+        }
+        
+        .telegram-btn {
+            width: 300px;
+            height: 60px;
+            background: #2AABEE;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px rgba(42, 171, 238, 0.3);
+        }
+        
+        .telegram-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(42, 171, 238, 0.4);
+            background: #229ED9;
+        }
+        
+        .telegram-note {
+            text-align: left;
+            color: var(--text-gray);
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Вкладки */
+        .tabs-container {
+            margin: 40px 0 80px;
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.2);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .tab-btn:hover {
+            color: #8A2BE2;
+        }
+        
+        .tab-btn.active {
+            color: #8A2BE2;
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #8A2BE2;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Вкладка услуг */
+        .services-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .services-table th,
+        .services-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .services-table th {
+            background: rgba(138, 43, 226, 0.1);
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .services-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .service-select-btn {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .service-select-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        /* Вкладка записи */
+        .booking-form {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        
+        .booking-btn {
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+        }
+        
+        .booking-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 100px 20px;
+            color: var(--text-gray);
+        }
+        
+        .error-message i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #8A2BE2;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .avatar-large {
+                align-self: center;
+            }
+            
+            .services-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .telegram-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Профиль мастера -->
+    <section class="master-profile">
+        <div class="container">
+            <div class="profile-header">
+                <button class="back-btn" onclick="window.location.href = 'masters.html'">
+                    <i class="fas fa-arrow-left"></i> Назад к мастерам
+                </button>
+            </div>
+            
+            <!-- Контейнер для профиля (заполнится через JS) -->
+            <div id="profileContainer">
+                <div class="error-message" id="loadingMessage">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>Загрузка профиля мастера...</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // Логика универсальной страницы мастера
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница мастера загружена');
+            
+            // Получаем ID мастера из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get('id') || sessionStorage.getItem('selectedMasterId');
+            
+            console.log('ID мастера:', masterId);
+            
+            if (!masterId) {
+                showError('Мастер не выбран');
+                return;
+            }
+            
+            // Загружаем данные мастера
+            loadMasterProfile(masterId);
+        });
+
+        function loadMasterProfile(masterId) {
+            console.log('Загружаем профиль мастера ID:', masterId);
+            
+            // Ищем мастера в базе данных
+            const masters = Zapis5MinData.getMasters();
+            const master = masters.find(m => m.id === parseInt(masterId));
+            
+            if (!master) {
+                showError('Мастер не найден');
+                return;
+            }
+            
+            console.log('Найден мастер:', master.name);
+            
+            // Отрисовываем профиль
+            renderMasterProfile(master);
+        }
+
+        function renderMasterProfile(master) {
+            const profileContainer = document.getElementById('profileContainer');
+            
+            // Получаем инициалы для аватара
+            const initials = getInitials(master.name);
+            
+            // Формируем список специализаций
+            const specialties = master.specialties ? master.specialties.map(cat => {
+                switch(cat) {
+                    case 'MANICURE_PEDICURE': return 'Маникюр';
+                    case 'MEN_HAIRCUT': return 'Мужская стрижка';
+                    case 'WOMEN_HAIRCUT': return 'Женская стрижка';
+                    case 'EYEBROWS': return 'Брови';
+                    case 'EYELASHES': return 'Ресницы';
+                    default: return cat;
+                }
+            }).join(', ') : '';
+            
+            // Создаем HTML профиля
+            profileContainer.innerHTML = `
+                <div class="profile-content">
+                    <div class="profile-avatar">
+                        <div class="avatar-large" style="background: ${master.avatar_color || '#8A2BE2'}">
+                            ${initials}
+                        </div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h1 class="profile-name">${master.name}</h1>
+                        
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <span>Возраст: ${master.age || 'не указан'} лет</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Город: ${master.city || 'не указан'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Опыт: ${master.experience || 0} лет</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-star"></i>
+                                <span>Рейтинг: ${master.rating || 0} (${master.reviews_count || 0} отзывов)</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-comment-alt"></i>
+                                <span>${master.description || 'Профессиональный мастер'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-spa"></i>
+                                <span>Специализация: ${specialties}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="telegram-btn-container">
+                            <button class="telegram-btn" onclick="openTelegram('${master.telegram || ''}')">
+                                <i class="fab fa-telegram"></i> НАПИСАТЬ В ТЕЛЕГРАМ
+                            </button>
+                            <p class="telegram-note">Написать мастеру для уточнения деталей</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Вкладки -->
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab('services', ${master.id})">УСЛУГИ И ЦЕНЫ</button>
+                        <button class="tab-btn" onclick="switchTab('booking', ${master.id})">ЗАПИСЬ</button>
+                    </div>
+                    
+                    <!-- Вкладка услуг -->
+                    <div id="tab-services" class="tab-content active">
+                        ${renderServicesTable(master)}
+                    </div>
+                    
+                    <!-- Вкладка записи -->
+                    <div id="tab-booking" class="tab-content">
+                        ${renderBookingForm(master)}
+                    </div>
+                </div>
+            `;
+            
+            // Инициализируем первую вкладку
+            switchTab('services', master.id);
+        }
+
+        function renderServicesTable(master) {
+            if (!master.services || master.services.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+                        <i class="fas fa-spa" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <p>У мастера пока нет услуг</p>
+                    </div>
+                `;
+            }
+            
+            let tableHTML = `
+                <table class="services-table">
+                    <thead>
+                        <tr>
+                            <th>УСЛУГА</th>
+                            <th>ЦЕНА</th>
+                            <th>ДЛИТЕЛЬНОСТЬ</th>
+                            <th>ВЫБРАТЬ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            master.services.forEach(service => {
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <div style="color: var(--text-light); font-weight: 500;">${service.name}</div>
+                            ${service.description ? `<div style="color: var(--text-gray); font-size: 14px; margin-top: 5px;">${service.description}</div>` : ''}
+                        </td>
+                        <td><strong>${service.price.toLocaleString()} ₽</strong></td>
+                        <td>${service.duration || 60} мин</td>
+                        <td>
+                            <button class="service-select-btn" onclick="selectService(${master.id}, ${service.id})">
+                                Выбрать
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            return tableHTML;
+        }
+
+        function renderBookingForm(master) {
+            if (!master.services || master.services.length === 0) {
+                return `
+                    <div style="text-align: center; padding: 40px; color: var(--text-gray);">
+                        <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <p>У мастера пока нет услуг для записи</p>
+                    </div>
+                `;
+            }
+            
+            let optionsHTML = '';
+            master.services.forEach(service => {
+                optionsHTML += `<option value="${service.id}">${service.name} - ${service.price.toLocaleString()} ₽ (${service.duration || 60} мин)</option>`;
+            });
+            
+            return `
+                <div class="booking-form">
+                    <div class="form-group">
+                        <label class="form-label">Выберите услугу:</label>
+                        <select class="form-select" id="bookingServiceSelect">
+                            ${optionsHTML}
+                        </select>
+                    </div>
+                    
+                    <button class="booking-btn" onclick="bookService(${master.id})">
+                        ЗАПИСАТЬСЯ НА УСЛУГУ
+                    </button>
+                </div>
+            `;
+        }
+
+        function switchTab(tabName, masterId) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+                tab.classList.remove('active');
+            });
+            
+            // Убираем активный класс со всех кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показываем нужную вкладку
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Активируем кнопку
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.textContent.includes(tabName === 'services' ? 'УСЛУГИ' : 'ЗАПИСЬ')) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function selectService(masterId, serviceId) {
+            console.log('Выбрана услуга:', serviceId, 'у мастера:', masterId);
+            
+            // Сохраняем выбранные данные
+            sessionStorage.setItem('selectedMasterId', masterId);
+            sessionStorage.setItem('selectedServiceId', serviceId);
+            
+            // Переходим на вкладку записи
+            switchTab('booking', masterId);
+            
+            // Выбираем эту услугу в выпадающем списке
+            const select = document.getElementById('bookingServiceSelect');
+            if (select) {
+                select.value = serviceId;
+            }
+        }
+
+        function bookService(masterId) {
+            // Проверяем авторизацию
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (!currentUser) {
+                alert('Для записи необходимо войти в систему');
+                window.location.href = 'auth.html?redirect=booking';
+                return;
+            }
+            
+            const serviceSelect = document.getElementById('bookingServiceSelect');
+            if (!serviceSelect) {
+                alert('Сначала выберите услугу');
+                return;
+            }
+            
+            const serviceId = serviceSelect.value;
+            
+            // Сохраняем данные для страницы записи
+            const bookingData = {
+                masterId: masterId,
+                serviceId: parseInt(serviceId)
+            };
+            
+            sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+            
+            // Переходим на страницу записи
+            window.location.href = 'booking.html';
+        }
+
+        function openTelegram(telegramUsername) {
+            if (!telegramUsername || telegramUsername === 'undefined') {
+                alert('У мастера не указан Telegram');
+                return;
+            }
+            
+            // Очищаем username от @ если есть
+            const cleanUsername = telegramUsername.replace('@', '');
+            const telegramUrl = `https://t.me/${cleanUsername}`;
+            
+            window.open(telegramUrl, '_blank');
+        }
+
+        function showError(message) {
+            const profileContainer = document.getElementById('profileContainer');
+            profileContainer.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>${message}</h3>
+                    <p>Попробуйте выбрать мастера снова</p>
+                    <button class="back-btn" onclick="window.location.href = 'masters.html'" style="margin-top: 20px;">
+                        <i class="fas fa-arrow-left"></i> Вернуться к выбору мастеров
+                    </button>
+                </div>
+            `;
+        }
+
+        // Вспомогательные функции
+        function getInitials(name) {
+            if (!name) return 'МК';
+            return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+        }
+    </script>
+</body>
+</html>

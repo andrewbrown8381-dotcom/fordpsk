@@ -1,0 +1,406 @@
+// Логика авторизации и регистрации
+
+let registrationData = {};
+let smsTimer = null;
+let countdownSeconds = 60;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем редирект
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirect = urlParams.get('redirect');
+    
+    if (redirect === 'booking') {
+        showMessage('Для записи необходимо войти в систему', 'info');
+    }
+    
+    // Загружаем сохраненные данные для входа
+    const rememberMe = localStorage.getItem('rememberMe');
+    if (rememberMe === 'true') {
+        const savedEmail = localStorage.getItem('savedEmail');
+        const savedPassword = localStorage.getItem('savedPassword');
+        
+        if (savedEmail) {
+            document.getElementById('login-email').value = savedEmail;
+        }
+        if (savedPassword) {
+            document.getElementById('login-password').value = savedPassword;
+            document.getElementById('remember-me').checked = true;
+        }
+    }
+});
+
+function switchAuthTab(tab) {
+    // Переключаем вкладки
+    document.querySelectorAll('.auth-tab').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(tab === 'login' ? 'Вход' : 'Регистрация')) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Показываем соответствующую форму
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('sms-section').classList.remove('active');
+    
+    // Очищаем ошибки
+    clearErrors();
+}
+
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.classList.remove('show');
+        el.textContent = '';
+    });
+    
+    document.querySelectorAll('.form-input').forEach(el => {
+        el.classList.remove('error');
+    });
+}
+
+function showError(inputId, message) {
+    const input = document.getElementById(inputId);
+    const errorEl = document.getElementById(inputId + '-error');
+    
+    input.classList.add('error');
+    errorEl.textContent = message;
+    errorEl.classList.add('show');
+}
+
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.parentElement.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function moveToNext(current) {
+    const currentInput = document.getElementById(`sms-code-${current}`);
+    const nextInput = document.getElementById(`sms-code-${current + 1}`);
+    
+    if (currentInput.value && nextInput) {
+        nextInput.focus();
+    }
+    
+    // Проверяем, все ли поля заполнены
+    checkSMSCode();
+}
+
+function checkSMSCode() {
+    let code = '';
+    for (let i = 1; i <= 4; i++) {
+        code += document.getElementById(`sms-code-${i}`).value || '';
+    }
+    return code.length === 4;
+}
+
+// Вход в систему
+function login() {
+    clearErrors();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const rememberMe = document.getElementById('remember-me').checked;
+    
+    // Валидация
+    let isValid = true;
+    
+    if (!email) {
+        showError('login-email', 'Введите email');
+        isValid = false;
+    } else if (!isValidEmail(email)) {
+        showError('login-email', 'Введите корректный email');
+        isValid = false;
+    }
+    
+    if (!password) {
+        showError('login-password', 'Введите пароль');
+        isValid = false;
+    }
+    
+    if (!isValid) return;
+    
+    // Проверяем пользователя
+    const users = BeautyProData.getUsers();
+    const user = users.find(u => 
+        u.email === email && 
+        u.password === password && 
+        u.is_verified === true
+    );
+    
+    if (user) {
+        // Сохраняем данные для запоминания
+        if (rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+            localStorage.setItem('savedEmail', email);
+            localStorage.setItem('savedPassword', password);
+        } else {
+            localStorage.removeItem('rememberMe');
+            localStorage.removeItem('savedEmail');
+            localStorage.removeItem('savedPassword');
+        }
+        
+        // Сохраняем текущего пользователя
+        localStorage.setItem('current_user', JSON.stringify(user));
+        
+        showMessage('Вход выполнен успешно!', 'success');
+        
+        // Проверяем редирект
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        
+        setTimeout(() => {
+            if (redirect === 'booking') {
+                const pendingBooking = sessionStorage.getItem('pendingBooking');
+                if (pendingBooking) {
+                    const bookingData = JSON.parse(pendingBooking);
+                    sessionStorage.removeItem('pendingBooking');
+                    
+                    // Перенаправляем на страницу записи
+                    sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+                    window.location.href = 'booking.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else if (user.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else if (user.role === 'master') {
+                window.location.href = 'master-dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }, 1500);
+        
+    } else {
+        showError('login-email', 'Неверный email или пароль');
+    }
+}
+
+// Начало регистрации
+function startRegistration() {
+    clearErrors();
+    
+    // Собираем данные
+    registrationData = {
+        name: document.getElementById('register-name').value.trim(),
+        email: document.getElementById('register-email').value.trim(),
+        phone: document.getElementById('register-phone').value.trim().replace(/\D/g, ''),
+        password: document.getElementById('register-password').value,
+        confirm: document.getElementById('register-confirm').value,
+        agree: document.getElementById('agree-terms').checked
+    };
+    
+    // Валидация
+    let isValid = true;
+    
+    // Проверка имени (минимум 2 слова)
+    const nameWords = registrationData.name.split(' ').filter(word => word.length > 0);
+    if (nameWords.length < 2) {
+        showError('register-name', 'Введите имя и фамилию');
+        isValid = false;
+    }
+    
+    // Проверка email
+    if (!registrationData.email) {
+        showError('register-email', 'Введите email');
+        isValid = false;
+    } else if (!isValidEmail(registrationData.email)) {
+        showError('register-email', 'Введите корректный email');
+        isValid = false;
+    } else if (!isValidEmailDomain(registrationData.email)) {
+        showError('register-email', 'Допустимые домены: gmail.com, yandex.ru, mail.ru');
+        isValid = false;
+    }
+    
+    // Проверка телефона
+    if (!registrationData.phone) {
+        showError('register-phone', 'Введите номер телефона');
+        isValid = false;
+    } else if (registrationData.phone.length !== 10) {
+        showError('register-phone', 'Введите корректный номер телефона (10 цифр)');
+        isValid = false;
+    }
+    
+    // Проверка пароля
+    if (!registrationData.password) {
+        showError('register-password', 'Введите пароль');
+        isValid = false;
+    } else if (registrationData.password.length < 8) {
+        showError('register-password', 'Пароль должен содержать минимум 8 символов');
+        isValid = false;
+    }
+    
+    // Проверка подтверждения пароля
+    if (!registrationData.confirm) {
+        showError('register-confirm', 'Подтвердите пароль');
+        isValid = false;
+    } else if (registrationData.password !== registrationData.confirm) {
+        showError('register-confirm', 'Пароли не совпадают');
+        isValid = false;
+    }
+    
+    // Проверка согласия
+    if (!registrationData.agree) {
+        showMessage('Необходимо согласиться с правилами сервиса', 'error');
+        isValid = false;
+    }
+    
+    if (!isValid) return;
+    
+    // Проверяем, не зарегистрирован ли уже email
+    const users = BeautyProData.getUsers();
+    const existingUser = users.find(u => u.email === registrationData.email);
+    
+    if (existingUser) {
+        showError('register-email', 'Этот email уже зарегистрирован');
+        return;
+    }
+    
+    // Переходим к SMS-подтверждению
+    document.getElementById('sms-phone-display').textContent = 
+        `+7 ${registrationData.phone.substring(0, 3)} ${registrationData.phone.substring(3, 6)}-${registrationData.phone.substring(6, 8)}-${registrationData.phone.substring(8)}`;
+    
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('sms-section').classList.add('active');
+    
+    // Запускаем таймер для отправки SMS
+    startSMSTimer();
+    
+    // Для демо - автоматически заполняем код
+    setTimeout(() => {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            document.getElementById('sms-code-1').value = '1';
+            document.getElementById('sms-code-2').value = '2';
+            document.getElementById('sms-code-3').value = '3';
+            document.getElementById('sms-code-4').value = '4';
+            checkSMSCode();
+        }
+    }, 1000);
+}
+
+// Подтверждение SMS
+function verifySMS() {
+    if (!checkSMSCode()) {
+        document.getElementById('sms-error').textContent = 'Введите 4-значный код';
+        document.getElementById('sms-error').classList.add('show');
+        return;
+    }
+    
+    // Для демо - код всегда 1234
+    let code = '';
+    for (let i = 1; i <= 4; i++) {
+        code += document.getElementById(`sms-code-${i}`).value;
+    }
+    
+    if (code !== '1234' && code !== '0000') {
+        document.getElementById('sms-error').textContent = 'Неверный код подтверждения';
+        document.getElementById('sms-error').classList.add('show');
+        return;
+    }
+    
+    // Регистрируем пользователя
+    const users = BeautyProData.getUsers();
+    const newUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 2;
+    
+    const newUser = {
+        id: newUserId,
+        email: registrationData.email,
+        password: registrationData.password,
+        name: registrationData.name,
+        phone: '+7' + registrationData.phone,
+        role: 'client',
+        is_verified: true,
+        created_at: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    BeautyProData.updateUsers(users);
+    
+    // Автоматически входим
+    localStorage.setItem('current_user', JSON.stringify(newUser));
+    
+    showMessage('Регистрация успешно завершена!', 'success');
+    
+    setTimeout(() => {
+        // Проверяем редирект
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        
+        if (redirect === 'booking') {
+            const pendingBooking = sessionStorage.getItem('pendingBooking');
+            if (pendingBooking) {
+                const bookingData = JSON.parse(pendingBooking);
+                sessionStorage.removeItem('pendingBooking');
+                
+                sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+                window.location.href = 'booking.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        } else {
+            window.location.href = 'index.html';
+        }
+    }, 1500);
+}
+
+// Отправка SMS повторно
+function resendSMS() {
+    clearSMSTimer();
+    startSMSTimer();
+    
+    // Для демо - снова заполняем код
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        document.getElementById('sms-code-1').value = '1';
+        document.getElementById('sms-code-2').value = '2';
+        document.getElementById('sms-code-3').value = '3';
+        document.getElementById('sms-code-4').value = '4';
+        checkSMSCode();
+    }
+}
+
+// Таймер для SMS
+function startSMSTimer() {
+    countdownSeconds = 60;
+    const resendBtn = document.getElementById('resend-btn');
+    const timerDisplay = document.getElementById('countdown');
+    
+    resendBtn.disabled = true;
+    
+    smsTimer = setInterval(() => {
+        countdownSeconds--;
+        timerDisplay.textContent = countdownSeconds;
+        
+        if (countdownSeconds <= 0) {
+            clearSMSTimer();
+            resendBtn.disabled = false;
+            document.getElementById('resend-timer').style.display = 'none';
+        }
+    }, 1000);
+}
+
+function clearSMSTimer() {
+    if (smsTimer) {
+        clearInterval(smsTimer);
+        smsTimer = null;
+    }
+}
+
+// Вспомогательные функции
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+function isValidEmailDomain(email) {
+    const allowedDomains = ['gmail.com', 'yandex.ru', 'mail.ru', 'yandex.com', 'mail.com'];
+    const domain = email.split('@')[1];
+    return allowedDomains.some(allowed => domain.endsWith(allowed));
+}

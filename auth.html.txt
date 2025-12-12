@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход и регистрация - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+        }
+        
+        .auth-box {
+            background: var(--bg-card);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab:hover {
+            background: rgba(138, 43, 226, 0.1);
+        }
+        
+        .auth-tab.active {
+            color: #8A2BE2;
+            position: relative;
+        }
+        
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #8A2BE2;
+        }
+        
+        .auth-form {
+            padding: 40px;
+        }
+        
+        .form-title {
+            font-size: 24px;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: #ff4757;
+        }
+        
+        .error-message {
+            color: #ff4757;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .phone-prefix {
+            padding: 15px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            font-weight: 500;
+            color: var(--text-light);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .password-toggle {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 0;
+        }
+        
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .form-checkbox label {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+        
+        .form-checkbox a {
+            color: #8A2BE2;
+            text-decoration: none;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #8A2BE2, #9370DB);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .auth-divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(138, 43, 226, 0.2);
+        }
+        
+        .auth-divider span {
+            background: var(--bg-card);
+            padding: 0 15px;
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        .sms-section {
+            display: none;
+        }
+        
+        .sms-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* ОДНО поле для SMS кода */
+        .sms-single-input {
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            letter-spacing: 10px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .sms-single-input:focus {
+            border-color: #8A2BE2;
+            outline: none;
+        }
+        
+        .resend-sms {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #8A2BE2;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .resend-btn:disabled {
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .timer {
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+        
+        .demo-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 10px;
+            color: var(--text-gray);
+            font-size: 14px;
+            border-left: 3px solid #8A2BE2;
+        }
+        
+        .demo-code {
+            font-weight: bold;
+            color: #8A2BE2;
+            font-size: 16px;
+        }
+        
+        .back-to-register {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .back-link {
+            color: #8A2BE2;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .auth-form {
+                padding: 30px 20px;
+            }
+            
+            .auth-tab {
+                padding: 15px;
+                font-size: 16px;
+            }
+            
+            .sms-single-input {
+                font-size: 20px;
+                letter-spacing: 8px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="auth.html" class="nav-link active"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="auth-container">
+        <div class="container">
+            <div class="auth-box">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Вход</button>
+                    <button class="auth-tab" onclick="switchAuthTab('register')">Регистрация</button>
+                </div>
+                
+                <div id="login-form" class="auth-form">
+                    <h2 class="form-title">Вход в аккаунт</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="login-email" class="form-input" placeholder="example@gmail.com" value="admin@beautypro.ru">
+                        <div class="error-message" id="login-email-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <div class="password-toggle">
+                            <input type="password" id="login-password" class="form-input" placeholder="Введите пароль" value="admin123">
+                            <button type="button" class="toggle-password" onclick="togglePassword('login-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="error-message" id="login-password-error"></div>
+                    </div>
+                    
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="remember-me" checked>
+                        <label for="remember-me">Запомнить меня</label>
+                        <a href="#" style="margin-left: auto;">Забыли пароль?</a>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="handleLogin()">Войти</button>
+                    
+                    <div class="demo-note">
+                        🔐 Для демо используйте:<br>
+                        • Админ: <span class="demo-code">admin@beautypro.ru / admin123</span><br>
+                        • Клиент: <span class="demo-code">client@test.ru / client123</span>
+                    </div>
+                </div>
+                
+                <div id="register-form" class="auth-form" style="display: none;">
+                    <h2 class="form-title">Создать аккаунт</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Имя и фамилия</label>
+                        <input type="text" id="register-name" class="form-input" placeholder="Иван Иванов">
+                        <div class="error-message" id="register-name-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="register-email" class="form-input" placeholder="example@gmail.com">
+                        <div class="error-message" id="register-email-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Номер телефона</label>
+                        <div class="phone-input-container">
+                            <span class="phone-prefix">+7</span>
+                            <input type="tel" id="register-phone" class="form-input" placeholder="9991234567" 
+                                   pattern="[0-9]{10}" maxlength="10" oninput="formatPhone(this)">
+                        </div>
+                        <div class="error-message" id="register-phone-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <div class="password-toggle">
+                            <input type="password" id="register-password" class="form-input" placeholder="Минимум 8 символов">
+                            <button type="button" class="toggle-password" onclick="togglePassword('register-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="error-message" id="register-password-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Подтвердите пароль</label>
+                        <div class="password-toggle">
+                            <input type="password" id="register-confirm" class="form-input" placeholder="Повторите пароль">
+                            <button type="button" class="toggle-password" onclick="togglePassword('register-confirm')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="error-message" id="register-confirm-error"></div>
+                    </div>
+                    
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="agree-terms" checked>
+                        <label for="agree-terms">
+                            Я согласен с <a href="#">правилами сервиса</a> и <a href="#">политикой конфиденциальности</a>
+                        </label>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="handleRegistration()">Зарегистрироваться</button>
+                </div>
+                
+                <div id="sms-section" class="sms-section">
+                    <div class="auth-form">
+                        <h2 class="form-title">Подтверждение телефона</h2>
+                        
+                        <div class="demo-note">
+                            📱 <strong>Для демо используйте код:</strong><br>
+                            <span class="demo-code">1234</span> или <span class="demo-code">0000</span>
+                        </div>
+                        
+                        <p style="text-align: center; color: var(--text-gray); margin: 20px 0;">
+                            Мы отправили SMS с кодом на номер<br>
+                            <strong id="sms-phone-display" style="color: var(--text-light);">+7 999 123-45-67</strong>
+                        </p>
+                        
+                        <!-- ОДНО поле для кода -->
+                        <input type="text" id="sms-code-single" class="sms-single-input" 
+                               placeholder="1234" maxlength="4" oninput="validateSMSCode(this)">
+                        
+                        <div class="error-message" id="sms-error" style="text-align: center;"></div>
+                        
+                        <div class="resend-sms">
+                            <p class="timer" id="resend-timer">Отправить код повторно через <span id="countdown">60</span> сек</p>
+                            <button class="resend-btn" id="resend-btn" disabled onclick="resendSMS()">Отправить код повторно</button>
+                        </div>
+                        
+                        <button class="submit-btn" onclick="verifySMS()">Подтвердить</button>
+                        
+                        <div class="back-to-register">
+                            <a class="back-link" onclick="switchAuthTab('register')">
+                                <i class="fas fa-arrow-left"></i> Назад к регистрации
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // Логика авторизации и регистрации - ИСПРАВЛЕННАЯ
+        
+        let registrationData = {};
+        let smsTimer = null;
+        let countdownSeconds = 60;
+
+        // Простая функция показа сообщений
+        function showMessage(message, type = 'success') {
+            alert(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загружаем сохраненные данные для входа
+            const rememberMe = localStorage.getItem('rememberMe');
+            if (rememberMe === 'true') {
+                const savedEmail = localStorage.getItem('savedEmail');
+                const savedPassword = localStorage.getItem('savedPassword');
+                
+                if (savedEmail) document.getElementById('login-email').value = savedEmail;
+                if (savedPassword) {
+                    document.getElementById('login-password').value = savedPassword;
+                    document.getElementById('remember-me').checked = true;
+                }
+            }
+            
+            // Автозаполнение SMS кода для демо
+            setTimeout(() => {
+                if (document.getElementById('sms-section') && 
+                    document.getElementById('sms-section').classList.contains('active')) {
+                    document.getElementById('sms-code-single').value = '1234';
+                }
+            }, 500);
+        });
+
+        function switchAuthTab(tab) {
+            // Переключаем вкладки
+            document.querySelectorAll('.auth-tab').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(tab === 'login' ? 'Вход' : 'Регистрация')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Показываем соответствующую форму
+            document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+            document.getElementById('sms-section').classList.remove('active');
+            
+            // Очищаем ошибки
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            
+            document.querySelectorAll('.form-input').forEach(el => {
+                el.classList.remove('error');
+            });
+        }
+
+        function showError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorEl = document.getElementById(inputId + '-error');
+            
+            if (input) input.classList.add('error');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+            }
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            
+            const icon = input.parentElement.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function formatPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            
+            input.value = value;
+        }
+
+        function validateSMSCode(input) {
+            input.value = input.value.replace(/\D/g, '');
+            
+            if (input.value.length > 4) {
+                input.value = input.value.substring(0, 4);
+            }
+            
+            document.getElementById('sms-error').classList.remove('show');
+        }
+
+        // Вход в систему - РАБОЧАЯ ВЕРСИЯ
+        function handleLogin() {
+            console.log('Нажата кнопка Войти');
+            clearErrors();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            // Валидация
+            let isValid = true;
+            
+            if (!email) {
+                showError('login-email', 'Введите email');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                showError('login-email', 'Введите корректный email');
+                isValid = false;
+            }
+            
+            if (!password) {
+                showError('login-password', 'Введите пароль');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Проверяем пользователя
+            const users = Zapis5MinData.getUsers();
+            console.log('Все пользователи:', users);
+            
+            const user = users.find(u => 
+                u.email === email && 
+                u.password === password
+            );
+            
+            console.log('Найденный пользователь:', user);
+            
+            if (user) {
+                // Сохраняем данные для запоминания
+                if (rememberMe) {
+                    localStorage.setItem('rememberMe', 'true');
+                    localStorage.setItem('savedEmail', email);
+                    localStorage.setItem('savedPassword', password);
+                } else {
+                    localStorage.removeItem('rememberMe');
+                    localStorage.removeItem('savedEmail');
+                    localStorage.removeItem('savedPassword');
+                }
+                
+                // Сохраняем текущего пользователя
+                localStorage.setItem('current_user', JSON.stringify(user));
+                
+                alert('Вход выполнен успешно!');
+                
+                // Определяем куда переходить
+                setTimeout(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirect = urlParams.get('redirect');
+                    
+                    if (redirect === 'booking') {
+                        const pendingBooking = sessionStorage.getItem('pendingBooking');
+                        if (pendingBooking) {
+                            sessionStorage.setItem('bookingData', pendingBooking);
+                            sessionStorage.removeItem('pendingBooking');
+                            window.location.href = 'booking.html';
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    } else if (user.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else if (user.role === 'master') {
+                        window.location.href = 'master-dashboard.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 1000);
+                
+            } else {
+                showError('login-email', 'Неверный email или пароль');
+            }
+        }
+
+        // Регистрация
+        function handleRegistration() {
+            clearErrors();
+            
+            registrationData = {
+                name: document.getElementById('register-name').value.trim(),
+                email: document.getElementById('register-email').value.trim(),
+                phone: document.getElementById('register-phone').value.replace(/\D/g, ''),
+                password: document.getElementById('register-password').value,
+                confirm: document.getElementById('register-confirm').value,
+                agree: document.getElementById('agree-terms').checked
+            };
+            
+            // Валидация
+            let isValid = true;
+            
+            if (!registrationData.name || registrationData.name.split(' ').filter(w => w.length > 0).length < 2) {
+                showError('register-name', 'Введите имя и фамилию');
+                isValid = false;
+            }
+            
+            if (!registrationData.email) {
+                showError('register-email', 'Введите email');
+                isValid = false;
+            } else if (!isValidEmail(registrationData.email)) {
+                showError('register-email', 'Введите корректный email');
+                isValid = false;
+            }
+            
+            if (!registrationData.phone) {
+                showError('register-phone', 'Введите номер телефона');
+                isValid = false;
+            } else if (registrationData.phone.length !== 10) {
+                showError('register-phone', 'Введите 10 цифр номера');
+                isValid = false;
+            }
+            
+            if (!registrationData.password) {
+                showError('register-password', 'Введите пароль');
+                isValid = false;
+            } else if (registrationData.password.length < 8) {
+                showError('register-password', 'Минимум 8 символов');
+                isValid = false;
+            }
+            
+            if (!registrationData.confirm) {
+                showError('register-confirm', 'Подтвердите пароль');
+                isValid = false;
+            } else if (registrationData.password !== registrationData.confirm) {
+                showError('register-confirm', 'Пароли не совпадают');
+                isValid = false;
+            }
+            
+            if (!registrationData.agree) {
+                alert('Необходимо согласиться с правилами');
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            // Проверяем существующего пользователя
+            const users = Zapis5MinData.getUsers();
+            if (users.find(u => u.email === registrationData.email)) {
+                showError('register-email', 'Этот email уже зарегистрирован');
+                return;
+            }
+            
+            // Форматируем номер для отображения
+            const formattedPhone = registrationData.phone.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, '$1 $2-$3-$4');
+            document.getElementById('sms-phone-display').textContent = `+7 ${formattedPhone}`;
+            
+            // Переходим к SMS
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('sms-section').classList.add('active');
+            
+            // Автозаполняем код
+            document.getElementById('sms-code-single').value = '1234';
+            
+            // Запускаем таймер
+            startSMSTimer();
+        }
+
+        // Подтверждение SMS
+        function verifySMS() {
+            const smsCode = document.getElementById('sms-code-single').value.trim();
+            const errorEl = document.getElementById('sms-error');
+            
+            if (!smsCode || smsCode.length !== 4) {
+                errorEl.textContent = 'Введите 4-значный код';
+                errorEl.classList.add('show');
+                return;
+            }
+            
+            // Для демо принимаем 1234 или 0000
+            if (smsCode !== '1234' && smsCode !== '0000') {
+                errorEl.textContent = 'Неверный код';
+                errorEl.classList.add('show');
+                return;
+            }
+            
+            // Создаем пользователя
+            const users = Zapis5MinData.getUsers();
+            const newUserId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 3;
+            
+            const newUser = {
+                id: newUserId,
+                email: registrationData.email,
+                password: registrationData.password,
+                name: registrationData.name,
+                phone: '+7' + registrationData.phone,
+                role: 'client',
+                is_verified: true,
+                created_at: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            Zapis5MinData.updateUsers(users);
+            
+            // Автоматически входим
+            localStorage.setItem('current_user', JSON.stringify(newUser));
+            
+            alert('Регистрация успешно завершена!');
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        }
+
+        function resendSMS() {
+            clearSMSTimer();
+            startSMSTimer();
+            
+            // Для демо
+            document.getElementById('sms-code-single').value = '1234';
+        }
+
+        function startSMSTimer() {
+            countdownSeconds = 60;
+            const resendBtn = document.getElementById('resend-btn');
+            const timerDisplay = document.getElementById('countdown');
+            
+            if (resendBtn) resendBtn.disabled = true;
+            if (timerDisplay) timerDisplay.textContent = countdownSeconds;
+            
+            smsTimer = setInterval(() => {
+                countdownSeconds--;
+                if (timerDisplay) timerDisplay.textContent = countdownSeconds;
+                
+                if (countdownSeconds <= 0) {
+                    clearSMSTimer();
+                    if (resendBtn) {
+                        resendBtn.disabled = false;
+                        document.getElementById('resend-timer').style.display = 'none';
+                    }
+                }
+            }, 1000);
+        }
+
+        function clearSMSTimer() {
+            if (smsTimer) {
+                clearInterval(smsTimer);
+                smsTimer = null;
+            }
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+    </script>
+</body>
+</html>

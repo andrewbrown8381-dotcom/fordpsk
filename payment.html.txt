@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оплата предоплаты - Запись за 5 минут</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-container {
+            padding: 60px 0 80px;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.9));
+        }
+        
+        .payment-box {
+            background: var(--bg-card);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .payment-title {
+            font-size: 32px;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+        
+        .payment-subtitle {
+            color: var(--text-gray);
+            font-size: 18px;
+        }
+        
+        .payment-amount {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .amount-label {
+            font-size: 16px;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+        }
+        
+        .amount-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: #8A2BE2;
+        }
+        
+        .booking-code {
+            text-align: center;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+        }
+        
+        .payment-timer {
+            text-align: center;
+            margin: 40px 0;
+            padding: 25px;
+            background: rgba(138, 43, 226, 0.1);
+            border-radius: 15px;
+            border-left: 4px solid #8A2BE2;
+        }
+        
+        .timer-label {
+            color: var(--text-gray);
+            margin-bottom: 10px;
+        }
+        
+        .timer-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-light);
+            font-family: monospace;
+        }
+        
+        .payment-methods {
+            margin: 40px 0;
+        }
+        
+        .method-title {
+            font-size: 20px;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        .method-card {
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .method-card:hover {
+            border-color: #8A2BE2;
+        }
+        
+        .method-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .method-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .method-icon.bank { background: #4CAF50; }
+        .method-icon.qr { background: #2196F3; }
+        .method-icon.crypto { background: #FF9800; }
+        
+        .method-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .method-details {
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        
+        .card-number {
+            font-family: monospace;
+            font-size: 18px;
+            letter-spacing: 1px;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            color: var(--text-light);
+        }
+        
+        .payment-confirmation {
+            margin: 40px 0;
+        }
+        
+        .confirmation-title {
+            font-size: 20px;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+        }
+        
+        .last-digits-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .last-digits-input input {
+            flex: 1;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 25px 0;
+        }
+        
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group label {
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+        
+        .payment-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .payment-btn {
+            flex: 1;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .back-btn {
+            background: rgba(138, 43, 226, 0.1);
+            color: var(--text-gray);
+        }
+        
+        .back-btn:hover {
+            background: rgba(138, 43, 226, 0.2);
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .confirm-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .payment-note {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 14px;
+            margin-top: 30px;
+            font-style: italic;
+            padding: 15px;
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-box {
+                padding: 30px 20px;
+            }
+            
+            .payment-actions {
+                flex-direction: column;
+            }
+            
+            .amount-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Запись за 5 минут<br>в Мысках и на Грэсе</div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                    <a href="auth.html" class="nav-link"><i class="fas fa-user"></i> Войти</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <section class="payment-container">
+        <div class="container">
+            <div class="payment-box">
+                <div class="payment-header">
+                    <h1 class="payment-title">Оплата предоплаты</h1>
+                    <p class="payment-subtitle">Завершите бронирование, оплатив 50% от стоимости услуги</p>
+                </div>
+                
+                <div class="payment-amount">
+                    <div class="amount-label">Сумма к оплате:</div>
+                    <div class="amount-value" id="paymentAmount">1 250 ₽</div>
+                </div>
+                
+                <div class="booking-code">
+                    Код бронирования: <strong id="bookingCode">#Z-2024-001234</strong>
+                </div>
+                
+                <!-- Таймер -->
+                <div class="payment-timer">
+                    <div class="timer-label">⏰ Время на оплату:</div>
+                    <div class="timer-value" id="paymentTimer">10:00</div>
+                </div>
+                
+                <!-- Способы оплаты -->
+                <div class="payment-methods">
+                    <h2 class="method-title">СПОСОБЫ ОПЛАТЫ:</h2>
+                    
+                    <!-- Перевод на карту -->
+                    <div class="method-card">
+                        <div class="method-header">
+                            <div class="method-icon bank">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="method-name">Перевод на карту</div>
+                        </div>
+                        <div class="method-details">
+                            <p>Переведите сумму на карту:</p>
+                            <div class="card-number" id="cardNumber">2200 0000 0000 0000</div>
+                            <p><small>(В комментарии к переводу укажите номер заказа)</small></p>
+                        </div>
+                    </div>
+                    
+                    <!-- QR-код -->
+                    <div class="method-card">
+                        <div class="method-header">
+                            <div class="method-icon qr">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                            <div class="method-name">QR-код для СБП</div>
+                        </div>
+                        <div class="method-details">
+                            <p>Отсканируйте QR-код через приложение вашего банка</p>
+                            <div id="qrCodeContainer" style="text-align: center; margin-top: 15px;">
+                                <div style="width: 150px; height: 150px; margin: 0 auto; background: rgba(0, 0, 0, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-gray);">
+                                    <i class="fas fa-qrcode" style="font-size: 60px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Крипто -->
+                    <div class="method-card">
+                        <div class="method-header">
+                            <div class="method-icon crypto">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="method-name">USDT (крипто)</div>
+                        </div>
+                        <div class="method-details">
+                            <p>Кошелек для оплаты в USDT (TRC-20):</p>
+                            <div class="card-number" style="font-size: 14px; word-break: break-all;">
+                                TJ7fMH4gZk7F2wvKdXq5i9h3Wb8sRpN6y
+                            </div>
+                            <p><small>Отправляйте точную сумму. Комиссия сети оплачивается отправителем.</small></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Подтверждение оплаты -->
+                <div class="payment-confirmation">
+                    <h2 class="confirmation-title">Подтверждение оплаты</h2>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="paidCheckbox">
+                        <label for="paidCheckbox">Я оплатил(а) предоплату</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Последние 4 цифры карты отправителя:</label>
+                        <div class="last-digits-input">
+                            <input type="text" id="cardDigit1" class="form-input" maxlength="1" oninput="moveCardDigit(1)">
+                            <input type="text" id="cardDigit2" class="form-input" maxlength="1" oninput="moveCardDigit(2)">
+                            <input type="text" id="cardDigit3" class="form-input" maxlength="1" oninput="moveCardDigit(3)">
+                            <input type="text" id="cardDigit4" class="form-input" maxlength="1" oninput="moveCardDigit(4)">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="payment-actions">
+                    <button class="payment-btn back-btn" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Назад
+                    </button>
+                    <button class="payment-btn confirm-btn" id="confirmPaymentBtn" onclick="confirmPayment()">
+                        ПОДТВЕРДИТЬ ОПЛАТУ
+                    </button>
+                </div>
+                
+                <div class="payment-note">
+                    Примечание: "Временная мера, в будущем будет реализован автоматический прием платежей"
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Запись за 5 минут © 2024</h3>
+                    <p>Быстрая запись к мастерам красоты</p>
+                </div>
+                <div class="footer-section">
+                    <h4>КОНТАКТЫ</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                    <p><i class="fas fa-envelope"></i> info@zapis5min.ru</p>
+                    <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Красивая, д. 1</p>
+                </div>
+                <div class="footer-section">
+                    <h4>ТЕЛЕГРАМ</h4>
+                    <p><i class="fab fa-telegram"></i> <a href="https://t.me/zapis5min" target="_blank">Канал: @zapis5min</a></p>
+                    <p><i class="fas fa-robot"></i> <a href="https://t.me/zapis5min_bot" target="_blank">Помощник: @zapis5min_bot</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="data.js"></script>
+    <script>
+        // Логика страницы оплаты
+        let paymentTimer;
+        let remainingTime = 600; // 10 минут в секундах
+        let currentBooking = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем авторизацию
+            const currentUser = JSON.parse(localStorage.getItem('current_user'));
+            if (!currentUser) {
+                alert('Необходима авторизация');
+                window.location.href = 'auth.html';
+                return;
+            }
+            
+            // Загружаем данные бронирования
+            const savedBooking = sessionStorage.getItem('currentBooking');
+            if (!savedBooking) {
+                alert('Данные бронирования не найдены');
+                window.location.href = 'booking.html';
+                return;
+            }
+            
+            currentBooking = JSON.parse(savedBooking);
+            
+            // Заполняем информацию
+            document.getElementById('paymentAmount').textContent = 
+                '1 250 ₽'; // Для демо
+            
+            document.getElementById('bookingCode').textContent = 
+                currentBooking.booking_code || '#Z-' + new Date().getFullYear() + '-001234';
+            
+            // Запускаем таймер
+            startPaymentTimer();
+            
+            // Настраиваем валидацию чекбокса
+            const paidCheckbox = document.getElementById('paidCheckbox');
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            
+            paidCheckbox.addEventListener('change', function() {
+                confirmBtn.disabled = !this.checked;
+            });
+        });
+
+        function startPaymentTimer() {
+            updateTimerDisplay();
+            
+            paymentTimer = setInterval(() => {
+                remainingTime--;
+                updateTimerDisplay();
+                
+                if (remainingTime <= 0) {
+                    clearInterval(paymentTimer);
+                    showPaymentExpired();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            
+            document.getElementById('paymentTimer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (remainingTime <= 60) {
+                document.getElementById('paymentTimer').style.color = '#ff4757';
+            }
+        }
+
+        function showPaymentExpired() {
+            alert('Время на оплату истекло. Бронирование отменено.');
+            window.location.href = 'booking.html';
+        }
+
+        function moveCardDigit(current) {
+            const currentInput = document.getElementById(`cardDigit${current}`);
+            const nextInput = document.getElementById(`cardDigit${current + 1}`);
+            
+            if (currentInput.value && nextInput) {
+                nextInput.focus();
+            }
+        }
+
+        function confirmPayment() {
+            const paidCheckbox = document.getElementById('paidCheckbox');
+            if (!paidCheckbox.checked) {
+                alert('Подтвердите, что вы оплатили предоплату');
+                return;
+            }
+            
+            let cardDigits = '';
+            for (let i = 1; i <= 4; i++) {
+                const digit = document.getElementById(`cardDigit${i}`).value;
+                if (!digit || isNaN(digit)) {
+                    alert('Введите последние 4 цифры карты');
+                    document.getElementById(`cardDigit${i}`).focus();
+                    return;
+                }
+                cardDigits += digit;
+            }
+            
+            clearInterval(paymentTimer);
+            
+            alert('Оплата подтверждена! Создаем запись...');
+            
+            setTimeout(() => {
+                sessionStorage.setItem('confirmedBookingId', '1');
+                window.location.href = 'booking-success.html';
+            }, 1500);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
